@@ -1,5 +1,6 @@
 import { ChatBubble } from "../src"
 
+
 describe("ChatBubble instantiation", () => {
 
   it("missing required parameters", () => {
@@ -19,6 +20,14 @@ describe("ChatBubble instantiation", () => {
       userAgent: 'foo/1.0',
       botId: 'fdsf809ds8f09dsf',
     })).toBeInstanceOf(ChatBubble)
+  })
+
+  it("sets default hostname", () => {
+    const bubble = new ChatBubble({
+      userAgent: 'foo/1.0',
+      botId: 'fdsf809ds8f09dsf' })
+
+    expect(bubble.getConfig().hostname).toBe("bsqd.me")
   })
 
 })
