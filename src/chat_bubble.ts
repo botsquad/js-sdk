@@ -1,31 +1,17 @@
-import { Socket } from 'phoenix'
+import { Socket, Channel, Presence } from 'phoenix'
+import 'whatwg-fetch'
 
-interface Config {
-  botId: string
-  userAgent: string
-
-  locale?: string
-  timezone?: string
-  userToken?: string
-  hostname?: string
-  secure?: boolean
-  context?: Record<string, any>
-}
-
-interface ConnectResult {
-  userToken: string
-  badgeCount: number
-  bot: {
-    id: string
-    title: string
-    profilePicture: string
-  }
-  context: Record<string, any>
-}
+import {
+  Config,
+  ConnectResult,
+  BotAPIResponse,
+ } from './types'
+import { Conversations } from './conversations'
 
 export class ChatBubble {
   private config: Config
   private socket: Socket
+  private conversations: Conversations
 
   constructor(config: Config) {
     if (!config.userAgent.length) {
@@ -41,9 +27,8 @@ export class ChatBubble {
     config.hostname = config.hostname || 'bsqd.me'
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
 
-    const params = { user_token: config.userToken }
-    this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`, { params })
-
+    this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`)
+    this.conversations = new Conversations(this.socket, config)
     this.config = config
   }
 
@@ -52,18 +37,42 @@ export class ChatBubble {
   }
 
   async connect(): Promise<ConnectResult> {
+    // retrieve bot config
+    const bot = await this.getBotConfig()
+
+    // connect the socket
     await this.connectSocket()
 
+    // join visitors channel (for live view)
+
+    // join conversations channel (for badge count, context and delegate token)
+    const { userToken, badgeCount, context } = await this.conversations.join()
+
+    // if we have context in the config, push it over the conversations channel now.
+
     const result: ConnectResult = {
-        userToken: 'asfd',
-        badgeCount: 123,
-        bot: {
-          id: this.config.botId,
-          title: 'x',
-          profilePicture: 'x' },
-        context: {}
+      userToken,
+      badgeCount,
+      context,
+      bot: {
+        id: bot.id,
+        title: bot.title,
+        profilePicture: bot.profile_picture
+      }
     }
     return result
+  }
+
+  async disconnect(): Promise<void> {
+    return new Promise(
+      resolve => {
+        if (!this.socket.isConnected()) {
+          resolve()
+        } else {
+          this.socket.disconnect(resolve)
+        }
+      }
+    )
   }
 
   ///
@@ -73,5 +82,12 @@ export class ChatBubble {
       this.socket.onOpen(resolve)
       this.socket.connect()
     })
+  }
+
+  private async getBotConfig(): Promise<BotAPIResponse> {
+    const { secure, hostname, botId } = this.config
+    const url = `http${secure ? 's' : ''}://${hostname}/api/bot/${botId}`
+    const result = await fetch(url)
+    return await result.json()
   }
 }
