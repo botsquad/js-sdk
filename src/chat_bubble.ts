@@ -33,8 +33,8 @@ export class ChatBubble {
       throw(new Error('Required parameter missing: botId'))
     }
     if (window) {
-      config.locale = (config.locale || window.navigator?.language).replace('-', '_')
-      config.timezone = config.timezone || window.Intl?.DateTimeFormat().resolvedOptions().timeZone
+      config.locale = (config.locale || window?.navigator?.language || 'en').replace('-', '_')
+      config.timezone = config.timezone || window?.Intl?.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Amsterdam'
     }
     config.hostname = config.hostname || 'bsqd.me'
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
