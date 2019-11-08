@@ -25,10 +25,7 @@ const config = {
   locale: 'nl_NL',
   timezone: 'Europe/Amsterdam',
   userToken: '<userToken that was sent on the previous connect()>',
-  hostname: 'bsqd.me',
-  context: {
-    any: 'value'
-  }
+  hostname: 'bsqd.me'
 }
 
 const bubble = new ChatBubble(config)
@@ -77,6 +74,8 @@ bubble.nudgeDismiss(nudge)
 // engage with the nudge
 await bubble.nudgeEngage(nudge)
 
+// open the chat by visiting the webview URL:
+bubble.getWebviewUrl()
 ```
 
 Still to implement:
@@ -84,9 +83,6 @@ Still to implement:
 ```
 // configure push token
 bubble.configurePushToken('pushwoosh', '<token data>')
-
-// get the URL for the chat
-bubble.getWebviewUrl()
 
 // get the URL for the chat when clicking on a nudge
 bubble.getWebviewUrl(nudge)

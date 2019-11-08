@@ -22,6 +22,9 @@ export class ChatBubble {
   private pendingPageViews: I.PageView[] = []
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
 
+  private bot?: I.BotAPIResponse
+  private userToken?: string
+
   /**
    * Create the ChatBubble instance
    */
@@ -56,10 +59,12 @@ export class ChatBubble {
     // retrieve bot config, connect
     const [bot,] = await Promise.all<I.BotAPIResponse, void>([this.getBotConfig(), this.connectSocket()])
 
+    this.bot = bot
 
     // join conversations channel (for badge count, context and delegate token)
     const joinResponse = await this.conversations.join()
     const { userToken, badgeCount, context } = joinResponse
+    this.userToken = userToken
 
     this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher)
     await this.visitors.join()
@@ -137,6 +142,29 @@ export class ChatBubble {
    */
   nudgeDiscard(nudge: Nudge): Promise<void> {
     return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.DISCARD) || Promise.reject()
+  }
+
+  /**
+   * Retrieve the URL for the webview that can be embedded to show the bot's conversation(s).
+   * Returns `null` when not connected or when the configured but does not have a publicly
+   * accessible web interface.
+   */
+  getWebviewUrl(): string | null {
+    if (!this.bot?.web_pwa?.id) return null
+    let url = `http${this.config.secure ? 's' : ''}://`
+
+    const { id, is_subdomain } = this.bot.web_pwa
+    const { hostname } = this.config
+    if ( is_subdomain) {
+      url += `${id}.${hostname}`
+    } else {
+      url += id
+    }
+    url += `/embed`
+    if (this.userToken) {
+      url += `?u=${this.config.userToken}`
+    }
+    return url
   }
 
   ///

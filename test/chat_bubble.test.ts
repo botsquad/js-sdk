@@ -68,6 +68,8 @@ describe('ChatBubble connection', () => {
     expect(info.bot.title).toBe('JS-SDK Bot')
     expect(info.bot.profilePicture).toMatch(/^https:\/\/s3.eu-west-1.amazonaws.com/)
 
+    expect(bubble.getWebviewUrl()).toMatch(/^https:\/\/cbl.staging.bsqd.me/)
+
     await bubble.disconnect()
   })
 

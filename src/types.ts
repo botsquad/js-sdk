@@ -62,6 +62,10 @@ export namespace Internal {
     profile_picture: string
     locale: string
     extra_locales: string[]
+    web_pwa: {
+      id: string
+      is_subdomain: boolean
+    }
   }
 
   export interface ConversationsJoinResponse {
