@@ -9,11 +9,16 @@ export class Visitors {
 
   constructor(socket: Socket, config: Config, conversationInfo: ConversationsJoinResponse) {
     this.channel = socket.channel(`visitor:${config.botId}`, this.joinParams(config, conversationInfo))
-    console.log(this.joinParams(config, conversationInfo));
   }
 
   async join(): Promise<JoinResponse> {
     return await this.joinChannel()
+  }
+
+  async sendPageView(url: string, title: string): Promise<void> {
+    return new Promise(resolve => {
+      this.channel.push('page_view', { url, title }).receive('ok', resolve)
+    })
   }
 
   ///

@@ -9,11 +9,14 @@ import {
 import { Conversations } from './conversations'
 import { Visitors } from './visitors'
 
+type PageView = { url: string, title: string }
+
 export class ChatBubble {
   private config: Config
   private socket: Socket
   private conversations: Conversations
   private visitors?: Visitors
+  private pendingPageViews: PageView[] = []
 
   constructor(config: Config) {
     if (!config.userAgent.length) {
@@ -50,6 +53,10 @@ export class ChatBubble {
     this.visitors = new Visitors(this.socket, this.config, joinResponse)
     await this.visitors.join()
 
+    // send any pending pageview
+    this.pendingPageViews.forEach(({ url, title }) => this.sendPageView(url, title))
+    this.pendingPageViews = []
+
     // if we have context in the config, push it over the conversations channel now.
 
     return {
@@ -74,6 +81,14 @@ export class ChatBubble {
         }
       }
     )
+  }
+
+  async sendPageView(url: string, title: string) {
+    if (!this.visitors) {
+      this.pendingPageViews.push({ url, title })
+      return
+    }
+    return this.visitors.sendPageView(url, title)
   }
 
   ///
