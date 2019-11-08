@@ -112,6 +112,7 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "phoenix": "^1.4.10"
+    "phoenix": "^1.4.10",
+    "ste-simple-events": "^1.6.3"
   }
 }

@@ -46,6 +46,13 @@ export interface ConnectResult {
   context: Record<string, any>
 }
 
+export interface Nudge {
+  id: string
+  message: string
+  caption?: string
+  profile_picture?: string
+}
+
 // Botsquad websocket / REST API responses
 export namespace Internal {
 
@@ -98,5 +105,10 @@ export namespace Internal {
   export interface PageView {
     url: string
     title: string
+  }
+
+  export interface VisitorsNudge {
+    id: string
+    json: string
   }
 }

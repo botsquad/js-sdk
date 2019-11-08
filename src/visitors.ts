@@ -1,11 +1,16 @@
 import { Socket, Channel } from 'phoenix'
-import { Config, Internal as I } from './types'
+import { SimpleEventDispatcher } from 'ste-simple-events'
+import { Config, Nudge, Internal as I } from './types'
 
 export namespace Internal {
+  type OnNudge = SimpleEventDispatcher<Nudge>
+
   export class Visitors {
     private channel: Channel
+    public onNudge: OnNudge
 
-    constructor(socket: Socket, config: Config, conversationInfo: I.ConversationsJoinResponse) {
+    constructor(socket: Socket, config: Config, conversationInfo: I.ConversationsJoinResponse, onNudge: OnNudge) {
+      this.onNudge = onNudge
       this.channel = socket.channel(`visitor:${config.botId}`, this.joinParams(config, conversationInfo))
     }
 
@@ -33,10 +38,20 @@ export namespace Internal {
     private async joinChannel(): Promise<I.VisitorsJoinResponse> {
       return new Promise(resolve => {
         this.channel.join().receive('ok', resolve)
+        this.channel.on('nudge', this.onReceiveNudge)
 
-        // this.channel.on('nudge', this._onReceiveNudge)
         // this.channel.on('open_conversation', ({ g }))
       })
+    }
+
+    private onReceiveNudge = ({ id, json }: I.VisitorsNudge) => {
+      console.log('id', id)
+      console.log('json', json)
+
+      const nudge: Nudge = {
+        id, ...JSON.parse(json)
+      }
+      this.onNudge.dispatch(nudge)
     }
   }
 }

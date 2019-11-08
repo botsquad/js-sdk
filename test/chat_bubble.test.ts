@@ -1,5 +1,5 @@
 import { ChatBubble } from '../src'
-import { Config } from '../src/types'
+import { Config, Nudge } from '../src/types'
 
 describe('ChatBubble instantiation', () => {
   it('missing required parameters', () => {
@@ -107,4 +107,19 @@ describe('ChatBubble connection', () => {
     await bubble.connect()
   })
 
+})
+
+describe('ChatBubble nudges', () => {
+  it('receives nudges', async () => {
+    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
+
+    await bubble.connect()
+    bubble.sendPageView('https://example.com/trigger-nudge', 'My first page')
+
+    const nudge: Nudge = await new Promise<Nudge>(resolve => {
+      bubble.onNudge.subscribe(n => resolve(n))
+    })
+
+    expect(nudge.message).toMatch(/Hello there from the nudges/)
+  })
 })

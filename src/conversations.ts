@@ -1,4 +1,6 @@
 import { Socket, Channel, Presence } from 'phoenix'
+import { SimpleEventDispatcher } from 'ste-simple-events'
+
 import {
   Config,
   Internal as I
@@ -9,6 +11,7 @@ export namespace Internal {
     private channel: Channel
     private presence?: Presence
     private currentBadgeCount?: number
+    public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
 
     constructor(socket: Socket, config: Config) {
       const { botId, userToken } = config
@@ -45,8 +48,8 @@ export namespace Internal {
     private syncPresence = async () => {
       const badgeCount = await this.getBadgeCount()
       if (badgeCount !== this.currentBadgeCount) {
-        // FIXME send badgeCount event
         this.currentBadgeCount = badgeCount
+        this.onBadgeCountUpdate.dispatch(badgeCount)
       }
     }
 

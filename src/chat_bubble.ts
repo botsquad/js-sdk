@@ -1,9 +1,11 @@
 import { Socket } from 'phoenix'
+import { SimpleEventDispatcher } from 'ste-simple-events'
 import 'whatwg-fetch'
 
 import {
   Config,
   ConnectResult,
+  Nudge,
   Internal as I,
 } from './types'
 
@@ -19,6 +21,7 @@ export class ChatBubble {
   private conversations: C.Conversations
   private visitors?: V.Visitors
   private pendingPageViews: I.PageView[] = []
+  private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
 
   /**
    * Create the ChatBubble instance
@@ -61,7 +64,7 @@ export class ChatBubble {
     const joinResponse = await this.conversations.join()
     const { userToken, badgeCount, context } = joinResponse
 
-    this.visitors = new V.Visitors(this.socket, this.config, joinResponse)
+    this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher)
     await this.visitors.join()
 
     // send any pending pageview
@@ -107,6 +110,20 @@ export class ChatBubble {
       return
     }
     return this.visitors.sendPageView(url, title)
+  }
+
+  /**
+   * Subscribe to updates to the badge counter in the chat bubble.
+   */
+  public get onBadgeCountUpdate() {
+    return this.conversations.onBadgeCountUpdate.asEvent()
+  }
+
+  /**
+   * Subscribe to nudges
+   */
+  public get onNudge() {
+    return this.onNudgeDispatcher.asEvent()
   }
 
   ///
