@@ -24,6 +24,13 @@ export namespace Internal {
       })
     }
 
+    async nudgeResponse(nudge: Nudge, response: I.NudgeResponse): Promise<void> {
+      const payload = { action: response, nudge_id: nudge.id }
+      return new Promise(resolve => {
+        this.channel.push('nudge_response', payload).receive('ok', resolve)
+      })
+    }
+
     ///
 
     private joinParams(config: Config, conversationInfo: I.ConversationsJoinResponse): I.VisitorsJoinParams {

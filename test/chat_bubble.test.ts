@@ -110,7 +110,7 @@ describe('ChatBubble connection', () => {
 })
 
 describe('ChatBubble nudges', () => {
-  it('receives nudges', async () => {
+  it('can receive and engage with nudges', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
     await bubble.connect()
@@ -121,5 +121,8 @@ describe('ChatBubble nudges', () => {
     })
 
     expect(nudge.message).toMatch(/Hello there from the nudges/)
+
+    await bubble.nudgeEngage(nudge)
+    await bubble.nudgeDiscard(nudge)
   })
 })

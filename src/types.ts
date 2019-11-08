@@ -111,4 +111,9 @@ export namespace Internal {
     id: string
     json: string
   }
+
+  export enum NudgeResponse {
+    ENGAGE = 'engage',
+    DISCARD = 'discard'
+  }
 }

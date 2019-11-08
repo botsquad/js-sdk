@@ -115,15 +115,31 @@ export class ChatBubble {
   /**
    * Subscribe to updates to the badge counter in the chat bubble.
    */
-  public get onBadgeCountUpdate() {
+  get onBadgeCountUpdate() {
     return this.conversations.onBadgeCountUpdate.asEvent()
   }
 
   /**
-   * Subscribe to nudges
+   * Subscribe to nudges that are sent from the server. Nudges are sent in response to visitor
+   * events, mainly page views.
    */
-  public get onNudge() {
+  get onNudge() {
     return this.onNudgeDispatcher.asEvent()
+  }
+
+  /**
+   * Signal the server that the user has engaged with a nudge.
+   */
+  nudgeEngage(nudge: Nudge): Promise<void> {
+    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.ENGAGE) || Promise.reject()
+  }
+
+  /**
+   * Signal the server that the user has discarded a nudge. The given nudge will not be triggered
+   * again for this user.
+   */
+  nudgeDiscard(nudge: Nudge): Promise<void> {
+    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.DISCARD) || Promise.reject()
   }
 
   ///
