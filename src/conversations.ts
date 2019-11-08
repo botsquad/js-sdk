@@ -14,9 +14,9 @@ export namespace Internal {
     public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
 
     constructor(socket: Socket, config: Config) {
-      const { botId, userToken } = config
-      const delegate_token = typeof userToken === 'string' && userToken.length ? userToken : undefined
-      this.channel = socket.channel(`conversations:${botId}`, { delegate_token })
+      let { botId, userToken } = config
+      userToken = typeof userToken === 'string' && userToken.length ? userToken : undefined
+      this.channel = socket.channel(`conversations:${botId}`, { delegate_token: userToken })
     }
 
     async join(): Promise<I.ConversationsJoinResponse> {
