@@ -9,10 +9,10 @@
   "files": [
     "dist"
   ],
-  "author": "Arjan Scherpenisse <arjan@scherpenisse.net>",
+  "author": "Arjan Scherpenisse <arjan@botsquad.com>",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/botsquad/js-sdk"
   },
   "license": "MIT",
   "engines": {
