@@ -1,4 +1,4 @@
-import { Socket, Channel, Presence } from 'phoenix'
+import { Socket } from 'phoenix'
 import 'whatwg-fetch'
 
 import {
@@ -7,11 +7,13 @@ import {
   BotAPIResponse,
  } from './types'
 import { Conversations } from './conversations'
+import { Visitors } from './visitors'
 
 export class ChatBubble {
   private config: Config
   private socket: Socket
   private conversations: Conversations
+  private visitors?: Visitors
 
   constructor(config: Config) {
     if (!config.userAgent.length) {
@@ -21,7 +23,7 @@ export class ChatBubble {
       throw(new Error('Required parameter missing: botId'))
     }
     if (window) {
-      config.locale = config.locale || window.navigator?.language
+      config.locale = (config.locale || window.navigator?.language).replace('-', '_')
       config.timezone = config.timezone || window.Intl?.DateTimeFormat().resolvedOptions().timeZone
     }
     config.hostname = config.hostname || 'bsqd.me'
@@ -37,20 +39,20 @@ export class ChatBubble {
   }
 
   async connect(): Promise<ConnectResult> {
-    // retrieve bot config
-    const bot = await this.getBotConfig()
+    // retrieve bot config, connect
+    const [bot,] = await Promise.all<BotAPIResponse, void>([this.getBotConfig(), this.connectSocket()])
 
-    // connect the socket
-    await this.connectSocket()
-
-    // join visitors channel (for live view)
 
     // join conversations channel (for badge count, context and delegate token)
-    const { userToken, badgeCount, context } = await this.conversations.join()
+    const joinResponse = await this.conversations.join()
+    const { userToken, badgeCount, context } = joinResponse
+
+    this.visitors = new Visitors(this.socket, this.config, joinResponse)
+    await this.visitors.join()
 
     // if we have context in the config, push it over the conversations channel now.
 
-    const result: ConnectResult = {
+    return {
       userToken,
       badgeCount,
       context,
@@ -60,7 +62,6 @@ export class ChatBubble {
         profilePicture: bot.profile_picture
       }
     }
-    return result
   }
 
   async disconnect(): Promise<void> {
@@ -77,7 +78,7 @@ export class ChatBubble {
 
   ///
 
-  private async connectSocket() {
+  private async connectSocket(): Promise<void> {
     return new Promise(resolve => {
       this.socket.onOpen(resolve)
       this.socket.connect()

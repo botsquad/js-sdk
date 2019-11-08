@@ -5,8 +5,9 @@ import {
   ConversationsListResponse
 } from './types'
 
-interface JoinResponse {
+export interface JoinResponse {
   userToken: string
+  userId: string
   badgeCount: number
   context: Record<string, any>
 }
@@ -28,6 +29,7 @@ export class Conversations {
     const badgeCount = await this.getBadgeCount()
 
     return {
+      userId: response.user_id,
       userToken: response.delegate_token,
       badgeCount,
       context: {}

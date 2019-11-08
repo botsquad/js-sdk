@@ -108,10 +108,11 @@
     "tslint-config-prettier": "^1.15.0",
     "tslint-config-standard": "^8.0.1",
     "typedoc": "^0.15.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.2",
+    "@types/phoenix": "^1.4.3",
+    "@types/whatwg-fetch": "0.0.33"
   },
   "dependencies": {
-    "@types/phoenix": "^1.4.3",
     "phoenix": "^1.4.10"
   }
 }

@@ -51,3 +51,15 @@ export interface Conversation {
 export interface ConversationsListResponse {
   conversations: Conversation[]
 }
+
+export interface VisitorsJoinResponse {
+  visitor_id: string
+  user_id: string
+}
+
+export interface VisitorsJoinParams {
+  visitor_id: string
+  user_agent?: string
+  timezone?: string
+  locale?: string
+}
