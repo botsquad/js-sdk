@@ -24,7 +24,7 @@ const config = {
   // optional:
   locale: 'nl_NL',
   timezone: 'Europe/Amsterdam',
-  userToken: '<userToken that was sent on the previous connect()>,
+  userToken: '<userToken that was sent on the previous connect()>',
   hostname: 'bsqd.me',
   context: {
     any: 'value'
@@ -57,15 +57,6 @@ bubble.on('badgeCountUpdate', badgeCount => {
 // page change
 bubble.sendPageView('http://pageurl.com', 'page title')
 
-// configure push token
-bubble.configurePushToken('pushwoosh', '<token data>')
-
-// get the URL for the chat
-bubble.getWebviewUrl()
-
-// get the URL for the chat when clicking on a nudge
-bubble.getWebviewUrl(nudge)
-
 // nudges
 bubble.on('nudge', nudge => {
   const {
@@ -85,6 +76,18 @@ bubble.nudgeDismiss(nudge)
 
 // engage with the nudge
 await bubble.nudgeEngage(nudge)
-window.open(bubble.getWebviewUrl(nudge))
 
+```
+
+Still to implement:
+
+```
+// configure push token
+bubble.configurePushToken('pushwoosh', '<token data>')
+
+// get the URL for the chat
+bubble.getWebviewUrl()
+
+// get the URL for the chat when clicking on a nudge
+bubble.getWebviewUrl(nudge)
 ```

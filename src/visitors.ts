@@ -15,7 +15,7 @@ export namespace Internal {
     }
 
     async join(): Promise<I.VisitorsJoinResponse> {
-      return await this.joinChannel()
+      return this.joinChannel()
     }
 
     async sendPageView(url: string, title: string): Promise<void> {

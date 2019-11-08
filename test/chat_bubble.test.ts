@@ -1,5 +1,6 @@
 import { ChatBubble } from '../src'
 import { Config, Nudge } from '../src/types'
+import 'whatwg-fetch' // polyfill for jest
 
 describe('ChatBubble instantiation', () => {
   it('missing required parameters', () => {

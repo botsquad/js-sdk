@@ -1,6 +1,5 @@
 import { Socket } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
-import 'whatwg-fetch'
 
 import {
   Config,
@@ -155,6 +154,6 @@ export class ChatBubble {
     const { secure, hostname, botId } = this.config
     const url = `http${secure ? 's' : ''}://${hostname}/api/bot/${botId}`
     const result = await fetch(url)
-    return await result.json()
+    return result.json()
   }
 }
