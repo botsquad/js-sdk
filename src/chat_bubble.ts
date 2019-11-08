@@ -162,7 +162,7 @@ export class ChatBubble {
     }
     url += `/embed`
     if (this.userToken) {
-      url += `?u=${this.config.userToken}`
+      url += `?u=${this.userToken || ''}`
     }
     return url
   }
