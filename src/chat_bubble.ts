@@ -4,20 +4,25 @@ import 'whatwg-fetch'
 import {
   Config,
   ConnectResult,
-  BotAPIResponse,
- } from './types'
-import { Conversations } from './conversations'
-import { Visitors } from './visitors'
+  Internal as I,
+} from './types'
 
-type PageView = { url: string, title: string }
+import { Internal as C } from './conversations'
+import { Internal as V } from './visitors'
 
+/**
+ * Main entry point for interfacing with all functions related to the Botsquad chat bubble.
+ */
 export class ChatBubble {
   private config: Config
   private socket: Socket
-  private conversations: Conversations
-  private visitors?: Visitors
-  private pendingPageViews: PageView[] = []
+  private conversations: C.Conversations
+  private visitors?: V.Visitors
+  private pendingPageViews: I.PageView[] = []
 
+  /**
+   * Create the ChatBubble instance
+   */
   constructor(config: Config) {
     if (!config.userAgent.length) {
       throw(new Error('Required parameter missing: userAgent'))
@@ -33,24 +38,30 @@ export class ChatBubble {
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
 
     this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`)
-    this.conversations = new Conversations(this.socket, config)
+    this.conversations = new C.Conversations(this.socket, config)
     this.config = config
   }
 
+  /**
+   * Return the current config. This is the Config object that was passed in, augmented with all the default parameters.
+   */
   getConfig() {
     return this.config
   }
 
+  /**
+   * Open the websocket connection to the server.
+   */
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
-    const [bot,] = await Promise.all<BotAPIResponse, void>([this.getBotConfig(), this.connectSocket()])
+    const [bot,] = await Promise.all<I.BotAPIResponse, void>([this.getBotConfig(), this.connectSocket()])
 
 
     // join conversations channel (for badge count, context and delegate token)
     const joinResponse = await this.conversations.join()
     const { userToken, badgeCount, context } = joinResponse
 
-    this.visitors = new Visitors(this.socket, this.config, joinResponse)
+    this.visitors = new V.Visitors(this.socket, this.config, joinResponse)
     await this.visitors.join()
 
     // send any pending pageview
@@ -71,6 +82,9 @@ export class ChatBubble {
     }
   }
 
+  /**
+   * Close the connection to the server, if it was opened.
+   */
   async disconnect(): Promise<void> {
     return new Promise(
       resolve => {
@@ -83,6 +97,10 @@ export class ChatBubble {
     )
   }
 
+  /**
+   * Send a page view event to the server. Use this to track on which page of the website your user
+   * is currently visiting. In the backend this is used to show a realtime view of current visitors.
+   */
   async sendPageView(url: string, title: string) {
     if (!this.visitors) {
       this.pendingPageViews.push({ url, title })
@@ -100,7 +118,7 @@ export class ChatBubble {
     })
   }
 
-  private async getBotConfig(): Promise<BotAPIResponse> {
+  private async getBotConfig(): Promise<I.BotAPIResponse> {
     const { secure, hostname, botId } = this.config
     const url = `http${secure ? 's' : ''}://${hostname}/api/bot/${botId}`
     const result = await fetch(url)
