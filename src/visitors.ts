@@ -52,9 +52,6 @@ export namespace Internal {
     }
 
     private onReceiveNudge = ({ id, json }: I.VisitorsNudge) => {
-      console.log('id', id)
-      console.log('json', json)
-
       const nudge: Nudge = {
         id, ...JSON.parse(json)
       }

@@ -40,18 +40,19 @@ describe('ChatBubble instantiation', () => {
 })
 
 
-const XVALID_JOIN_PARAMS: Config = {
+const VALID_JOIN_PARAMS: Config = {
   botId: 'e222b5b3-9d36-4de6-bfc8-ebb93292521d',
-  userAgent: 'foo/1.0',
+  userAgent: 'foo/1.0 (Android 6.0)',
   hostname: 'staging.bsqd.me'
 }
-
+/*
 const VALID_JOIN_PARAMS: Config = {
   botId: '40d700a7-e643-43bf-a377-acab46ee9991',
   userAgent: 'foo/1.0 (Android 6.0)',
   hostname: 'localhost:4000',
   secure: false
 }
+*/
 
 describe('ChatBubble connection', () => {
   it('can connect', async () => {
