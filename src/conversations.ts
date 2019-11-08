@@ -15,7 +15,8 @@ export namespace Internal {
 
     constructor(socket: Socket, config: Config) {
       const { botId, userToken } = config
-      this.channel = socket.channel(`conversations:${botId}`, { delegate_token: userToken })
+      const delegate_token = typeof userToken === 'string' && userToken.length ? userToken : undefined
+      this.channel = socket.channel(`conversations:${botId}`, { delegate_token })
     }
 
     async join(): Promise<I.ConversationsJoinResponse> {
