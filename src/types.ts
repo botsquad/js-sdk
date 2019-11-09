@@ -30,9 +30,11 @@ export interface Config {
 }
 
 export interface ConnectResult {
-  /** The user's token as returned from the server. Save this token locally and use it the next time
+  /**
+   * The user's token as returned from the server. Save this token locally and use it the next time
    * in the [[ChatBubble]] constructor to ensure that the user is being identified over subsequent
-   * sessions. */
+   * sessions.
+   */
   userToken: string
 
   /** The current badge count that should be displayed on the chat bubble. */
