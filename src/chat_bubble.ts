@@ -12,8 +12,103 @@ import { Internal as C } from './conversations'
 import { Internal as V } from './visitors'
 
 /**
- * Main entry point for interfacing with all functions related to the Botsquad chat bubble.
- */
+# ChatBubble
+
+The ChatBubble class is the high-level container class that allows you to render a Chat Bubble in
+your web page or React Native app.
+
+Main entry point for interfacing with all functions related to the Botsquad chat bubble.  Its main
+purposes are the following:
+
+ - Get information about the chat bubble (bot details, unread message count)
+ - Keep the unread message count updated in realtime
+ - Send 'page view' events to indicate on which page the bubble is being displayed
+ - Configure the (web)app's push token
+ - Handle in-app nudges and allow the user to engage with these.
+
+## Getting started
+
+Instantiate this class with a [[Config]] object; then call [[ChatBubble.connect]] to establish the
+connection to the server.
+
+Example code:
+
+```javascript
+import { ChatBubble } from '@botsquad/sdk'
+
+const config = {
+  // required:
+  botId: '66a8fe768ea6fea876f987ea',
+  userAgent: 'testApp/1.0 (Android; 8)',
+
+  // optional:
+  locale: 'nl_NL',
+  timezone: 'Europe/Amsterdam',
+  userToken: '<userToken that was sent on the previous connect()>',
+  hostname: 'bsqd.me'
+}
+
+const bubble = new ChatBubble(config)
+
+// initiate the connection.
+const info = await bubble.connect()
+
+// information that is returned:
+const {
+  userToken,
+  badgeCount,
+  bot: {
+    id, title, profilePicture
+  },
+  context: {
+    any: 'value'
+  }
+} = info
+
+console.log(`Connected with user token: ${userToken}`)
+
+bubble.on('badgeCountUpdate', badgeCount => {
+  console.log('Got new badge count: ' + badgeCount)
+})
+
+// page change
+bubble.sendPageView('http://pageurl.com', 'page title')
+
+// nudges
+bubble.on('nudge', nudge => {
+  const {
+    message, profilePicture, caption
+  } = nudge
+
+  // show the nudge
+  if (caption) {
+    // show nudge with title bar and (optionally) a picture
+  } else {
+    // show basic message-only nudge
+  }
+})
+
+// dismiss the nudge
+bubble.nudgeDismiss(nudge)
+
+// engage with the nudge
+await bubble.nudgeEngage(nudge)
+
+// open the chat by visiting the webview URL:
+bubble.getWebviewUrl()
+```
+
+Still to implement:
+
+```
+// configure push token
+bubble.configurePushToken('pushwoosh', '<token data>')
+
+// get the URL for the chat when clicking on a nudge
+bubble.getWebviewUrl(nudge)
+```
+
+*/
 export class ChatBubble {
   private config: Config
   private socket: Socket

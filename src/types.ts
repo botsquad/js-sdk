@@ -1,5 +1,6 @@
 // SDK external facting types
 
+/** Contains the necessary parameters to instantiate a [[ChatBubble]] class */
 export interface Config {
   /** The identifier of the bot. The bot ID can be found in the URL when viewing the bot in the Botsquad studio. */
   botId: string
@@ -15,21 +16,23 @@ export interface Config {
 
   /**
    * The token that identifiers this user. The first time a connection is made, the token can be
-   * omitted, as it will be returned in the result of ChatBubble.connect(). Each subsequent `connect()`
-   * call should have this same userToken parameter, to ensure that the user is correctly
-   * identified.
+   * omitted, as it will be returned in the result of [[ChatBubble.connect]]. Each subsequent
+   * `connect()` call should have this same userToken parameter, to ensure that the user is
+   * correctly identified.
    */
   userToken?: string
 
-  /** The hostname of the endpoint. By default this points at `bsdq.me`. Leave unchanged. */
+  /** The hostname of the endpoint. By default this points at `bsdq.me`. Leave unchanged in most cases. */
   hostname?: string
 
-  /** Whether the connecting endpoint uses HTTPS or not */
+  /** Whether the connecting endpoint uses HTTPS or not. Defaults to `true`. Leave unchanged in most cases. */
   secure?: boolean
 }
 
 export interface ConnectResult {
-  /** The user's token as returned from the server. Save this token locally and use it the next time in the ChatBubble() constructor to ensure that the user is being identified over subsequent sessions. */
+  /** The user's token as returned from the server. Save this token locally and use it the next time
+   * in the [[ChatBubble]] constructor to ensure that the user is being identified over subsequent
+   * sessions. */
   userToken: string
 
   /** The current badge count that should be displayed on the chat bubble. */
@@ -46,15 +49,28 @@ export interface ConnectResult {
   context: Record<string, any>
 }
 
+/** Information about a "nudge"; a small piece of information that is shown to get the user to engage with the chatbot. */
 export interface Nudge {
+  /** Identifier */
   id: string
+  /** The nudge message */
   message: string
+  /** A caption which can be displayed on top of the nudge widget */
   caption?: string
+  /** A profile picture */
   profile_picture?: string
 }
 
 // Botsquad websocket / REST API responses
+/** @hidden */
 export namespace Internal {
+
+  /** Enumeration of the supported push notification providers */
+  export enum PushService {
+    WEB_PUSH = 'web-push',
+    FIREBASE = 'firebase',
+    PUSHWOOSH = 'pushwoosh'
+  }
 
   export interface BotAPIResponse {
     id: string
