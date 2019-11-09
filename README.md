@@ -1,5 +1,7 @@
 # Botsquad Typescript / Javascript SDK
 
+This repository holds the Botsquad client SDK. Generated documentation can be found here:
+https://doc.botsquad.com/js-sdk/
 
 
 ## Installation
