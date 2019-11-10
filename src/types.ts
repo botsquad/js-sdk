@@ -146,6 +146,6 @@ export namespace Internal {
   }
 
   export interface PushRegisterAPIResponse {
-    status: "OK"
+    result: "OK"
   }
 }

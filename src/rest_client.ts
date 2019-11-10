@@ -1,5 +1,6 @@
 import {
   Config,
+  PushService,
   Internal as I
 } from './types'
 
@@ -19,7 +20,7 @@ export namespace Internal {
       return this.request<void, I.BotAPIResponse>("GET", botId)
     }
 
-    public async pushSubscribe(botId: string, userToken: string, type: I.PushService, data: any) {
+    public async pushSubscribe(botId: string, userToken: string, type: PushService, data: any) {
       const request = {
         type, data,
         delegate_token: userToken,
@@ -34,7 +35,11 @@ export namespace Internal {
       const endpoint = this.endpointUrl(botId, path)
       const params = { method, headers: { 'content-type': 'application/json'}, body }
       const result = await fetch(endpoint, params)
-      return result.json() as Promise<RS>
+      if (result.status === 200) {
+        return result.json() as Promise<RS>
+      } else {
+        return Promise.reject(new Error(`API request for ${endpoint} failed: ${result.status}`))
+      }
     }
 
     private endpointUrl(botId: string, path?: string) {

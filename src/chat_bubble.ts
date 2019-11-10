@@ -159,15 +159,16 @@ export class ChatBubble {
 
     this.bot = bot
 
-    // join conversations channel (for badge count, context and delegate token)
+    // join conversations channel, for badge count, context and delegate token
     const joinResponse = await this.conversations.join()
     const { userToken, badgeCount, context } = joinResponse
     this.userToken = userToken
 
+    // join visitors channel, for live presence and tracking page views
     this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher)
     await this.visitors.join()
 
-    // send any pending pageview
+    // send any pending request
     this.postConnect.forEach(callback => callback())
     this.postConnect = []
 
@@ -203,9 +204,9 @@ export class ChatBubble {
    * is currently visiting. In the backend this is used to show a realtime view of current visitors.
    */
   async sendPageView(url: string, title: string) {
-    this.whenConnected(() => {
-      this.visitors!.sendPageView(url, title)
-    })
+    return this.whenConnected<{}>(
+      () => this.visitors!.sendPageView(url, title)
+    )
   }
 
   /**
@@ -266,19 +267,21 @@ export class ChatBubble {
    *
    * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
    */
-  public registerPushToken(type: PushService, data: any): void {
-    this.whenConnected(() => {
-      this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
-    })
+  public registerPushToken(type: PushService, data: any) {
+    return this.whenConnected<I.PushRegisterAPIResponse>(
+      () => this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
+    )
   }
 
   ///
 
-  private whenConnected(callback: () => void) {
+  private whenConnected<T>(callback: () => Promise<T>) {
     if (this.userToken) {
-      callback()
+      return callback()
     } else {
-      this.postConnect.push(callback)
+      return new Promise(resolve => {
+        this.postConnect.push(() => resolve(callback()))
+      })
     }
   }
 

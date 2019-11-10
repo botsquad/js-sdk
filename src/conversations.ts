@@ -1,5 +1,6 @@
 import { Socket, Channel, Presence } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
+import { promisify } from './channel'
 
 import {
   Config,
@@ -7,6 +8,7 @@ import {
 } from './types'
 
 export namespace Internal {
+
   export class Conversations {
     private channel: Channel
     private presence?: Presence
@@ -40,10 +42,10 @@ export namespace Internal {
       return conversations.reduce((count, conversation) => conversation.unread_message_count + count, 0)
     }
 
-    private async joinChannel(): Promise<I.ConversationsChannelJoinResponse> {
-      return new Promise(resolve => {
-        this.channel.join().receive('ok', resolve)
-      })
+    private async joinChannel() {
+      return promisify<I.ConversationsChannelJoinResponse>(
+        () => this.channel.join()
+      )
     }
 
     private syncPresence = async () => {
@@ -54,10 +56,10 @@ export namespace Internal {
       }
     }
 
-    private retrieveConversations(): Promise<I.ConversationsListResponse> {
-      return new Promise(resolve => {
-        this.channel.push('list_conversations', {}).receive('ok', resolve)
-      })
+    private retrieveConversations() {
+      return promisify<I.ConversationsListResponse>(
+        () => this.channel.push('list_conversations', {})
+      )
     }
   }
 }

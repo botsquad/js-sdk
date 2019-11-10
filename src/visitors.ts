@@ -1,6 +1,7 @@
 import { Socket, Channel } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 import { Config, Nudge, Internal as I } from './types'
+import { promisify } from './channel'
 
 export namespace Internal {
   type OnNudge = SimpleEventDispatcher<Nudge>
@@ -12,23 +13,25 @@ export namespace Internal {
     constructor(socket: Socket, config: Config, conversationInfo: I.ConversationsJoinResponse, onNudge: OnNudge) {
       this.onNudge = onNudge
       this.channel = socket.channel(`visitor:${config.botId}`, this.joinParams(config, conversationInfo))
+      this.channel.on('nudge', this.onReceiveNudge)
+      // this.channel.on('open_conversation', ({ g }))
     }
 
     async join(): Promise<I.VisitorsJoinResponse> {
       return this.joinChannel()
     }
 
-    async sendPageView(url: string, title: string): Promise<void> {
-      return new Promise(resolve => {
-        this.channel.push('page_view', { url, title }).receive('ok', resolve)
-      })
+    async sendPageView(url: string, title: string) {
+      return promisify<{}>(
+        () => this.channel.push('page_view', { url, title })
+      )
     }
 
     async nudgeResponse(nudge: Nudge, response: I.NudgeResponse): Promise<void> {
       const payload = { action: response, nudge_id: nudge.id }
-      return new Promise(resolve => {
-        this.channel.push('nudge_response', payload).receive('ok', resolve)
-      })
+      return promisify<void>(
+        () => this.channel.push('nudge_response', payload)
+      )
     }
 
     ///
@@ -43,12 +46,9 @@ export namespace Internal {
     }
 
     private async joinChannel(): Promise<I.VisitorsJoinResponse> {
-      return new Promise(resolve => {
-        this.channel.join().receive('ok', resolve)
-        this.channel.on('nudge', this.onReceiveNudge)
-
-        // this.channel.on('open_conversation', ({ g }))
-      })
+      return promisify<I.VisitorsJoinResponse>(
+        () => this.channel.join()
+      )
     }
 
     private onReceiveNudge = ({ id, json }: I.VisitorsNudge) => {
