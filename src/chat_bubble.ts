@@ -5,9 +5,10 @@ import {
   Config,
   ConnectResult,
   Nudge,
+  PushService,
   Internal as I,
 } from './types'
-
+import { Internal as R } from './rest_client'
 import { Internal as C } from './conversations'
 import { Internal as V } from './visitors'
 
@@ -113,11 +114,12 @@ export class ChatBubble {
   private socket: Socket
   private conversations: C.Conversations
   private visitors?: V.Visitors
-  private pendingPageViews: I.PageView[] = []
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
 
   private bot?: I.BotAPIResponse
   private userToken?: string
+  private restClient: R.RESTClient
+  private postConnect: (() => void)[] = []
 
   /**
    * Create the ChatBubble instance
@@ -135,6 +137,7 @@ export class ChatBubble {
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
 
     this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`)
+    this.restClient = new R.RESTClient(config)
     this.conversations = new C.Conversations(this.socket, config)
     this.config = config
   }
@@ -151,7 +154,8 @@ export class ChatBubble {
    */
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
-    const [bot,] = await Promise.all<I.BotAPIResponse, void>([this.getBotConfig(), this.connectSocket()])
+    const botResult = this.restClient.getBotConfig(this.config.botId)
+    const [bot,] = await Promise.all<I.BotAPIResponse, void>([botResult, this.connectSocket()])
 
     this.bot = bot
 
@@ -164,10 +168,8 @@ export class ChatBubble {
     await this.visitors.join()
 
     // send any pending pageview
-    this.pendingPageViews.forEach(({ url, title }) => this.sendPageView(url, title))
-    this.pendingPageViews = []
-
-    // if we have context in the config, push it over the conversations channel now.
+    this.postConnect.forEach(callback => callback())
+    this.postConnect = []
 
     return {
       userToken,
@@ -201,11 +203,9 @@ export class ChatBubble {
    * is currently visiting. In the backend this is used to show a realtime view of current visitors.
    */
   async sendPageView(url: string, title: string) {
-    if (!this.visitors) {
-      this.pendingPageViews.push({ url, title })
-      return
-    }
-    return this.visitors.sendPageView(url, title)
+    this.whenConnected(() => {
+      this.visitors!.sendPageView(url, title)
+    })
   }
 
   /**
@@ -261,19 +261,31 @@ export class ChatBubble {
     return url
   }
 
+  /**
+   * Register a push token for the current connection.
+   *
+   * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
+   */
+  public registerPushToken(type: PushService, data: any): void {
+    this.whenConnected(() => {
+      this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
+    })
+  }
+
   ///
+
+  private whenConnected(callback: () => void) {
+    if (this.userToken) {
+      callback()
+    } else {
+      this.postConnect.push(callback)
+    }
+  }
 
   private async connectSocket(): Promise<void> {
     return new Promise(resolve => {
       this.socket.onOpen(resolve)
       this.socket.connect()
     })
-  }
-
-  private async getBotConfig(): Promise<I.BotAPIResponse> {
-    const { secure, hostname, botId } = this.config
-    const url = `http${secure ? 's' : ''}://${hostname}/api/bot/${botId}`
-    const result = await fetch(url)
-    return result.json()
   }
 }

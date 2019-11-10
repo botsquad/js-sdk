@@ -1,5 +1,5 @@
 import { ChatBubble } from '../src'
-import { Config, Nudge } from '../src/types'
+import { Config, Nudge, PushService } from '../src/types'
 import 'whatwg-fetch' // polyfill for jest
 
 describe('ChatBubble instantiation', () => {
@@ -111,6 +111,15 @@ describe('ChatBubble connection', () => {
     await bubble.connect()
   })
 
+})
+
+describe('ChatBubble push notifications', () => {
+  it('can register a push token', async () => {
+    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
+    bubble.registerPushToken(PushService.EXPO, 'xx')
+
+    await bubble.connect()
+  })
 })
 
 describe('ChatBubble nudges', () => {

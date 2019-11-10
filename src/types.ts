@@ -63,16 +63,16 @@ export interface Nudge {
   profile_picture?: string
 }
 
-// Botsquad websocket / REST API responses
-/** @hidden */
-export namespace Internal {
+/** Enumeration of the supported push notification providers */
+export enum PushService {
+  WEB_PUSH = 'web-push',
+  FIREBASE = 'firebase',
+  PUSHWOOSH = 'pushwoosh',
+  EXPO = 'expo'
+}
 
-  /** Enumeration of the supported push notification providers */
-  export enum PushService {
-    WEB_PUSH = 'web-push',
-    FIREBASE = 'firebase',
-    PUSHWOOSH = 'pushwoosh'
-  }
+// Botsquad websocket / REST API responses
+export namespace Internal {
 
   export interface BotAPIResponse {
     id: string
@@ -137,5 +137,15 @@ export namespace Internal {
   export enum NudgeResponse {
     ENGAGE = 'engage',
     DISCARD = 'discard'
+  }
+
+  export interface PushRegisterAPIRequest {
+    type: PushService
+    data: any
+    delegate_token: string
+  }
+
+  export interface PushRegisterAPIResponse {
+    status: "OK"
   }
 }
