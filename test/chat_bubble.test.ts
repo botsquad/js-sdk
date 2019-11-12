@@ -82,6 +82,7 @@ describe('ChatBubble connection', () => {
 
     expect(typeof info.badgeCount).toBe('number')
     expect(typeof info.userToken).toBe('string')
+    expect(info.userInfo).toEqual(null)
 
     expect(info.bot.id).toBe(VALID_JOIN_PARAMS.botId)
     expect(info.bot.title).toBe('JS-SDK Bot')
@@ -124,6 +125,47 @@ describe('ChatBubble connection', () => {
 
     expect(userToken).toEqual(token2)
   })
+})
+
+describe('ChatBubble user info', () => {
+
+  it('can store user info', async () => {
+    let bubble: ChatBubble
+
+    bubble = new ChatBubble(VALID_JOIN_PARAMS)
+    const { userToken, userInfo } = await bubble.connect()
+    expect(userInfo).toEqual(null)
+
+    const result = await bubble.putUserInfo({ first_name: "SDK test user", last_name: "Lastname", foo: "bar" })
+
+    expect(result.first_name).toEqual("SDK test user")
+    expect(result.last_name).toEqual("Lastname")
+    expect(result.foo).toEqual("bar")
+    expect(result.timezone).toEqual("Europe/Amsterdam")
+    expect(result.locale).toEqual("en")
+
+    await bubble.disconnect()
+
+    bubble = new ChatBubble({ userToken, ...VALID_JOIN_PARAMS })
+    const { userInfo: info } = await bubble.connect()
+
+    expect(info!.first_name).toEqual("SDK test user")
+    expect(info!.last_name).toEqual("Lastname")
+    expect(info!.foo).toEqual("bar")
+  })
+
+  it('can send user info before connect', async () => {
+    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
+
+    bubble.putUserInfo({ foo: "12345" })
+
+    const { userInfo } = await bubble.connect()
+    expect(userInfo!.foo).toEqual("12345")
+  })
+
+})
+
+describe('ChatBubble page views', () => {
 
   it('can send page view', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
@@ -135,19 +177,19 @@ describe('ChatBubble connection', () => {
   })
 
   it('can send page view before connect', async () => {
-    expect.assertions(2)
+    expect.assertions(1)
 
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
     const a = bubble.sendPageView('https://example.com', 'My first page').then(
       result => expect(result).toEqual({}))
 
-    const b = bubble.sendPageView('xxbla', 'invalid page').catch(
-      error => expect(error).toError(/Invalid arguments/))
+    // errors before connect are ignored
+    bubble.sendPageView('xxbla', 'invalid page')
 
     await bubble.connect()
 
-    return Promise.all([a, b])
+    return a
   })
 
 })

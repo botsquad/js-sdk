@@ -6,6 +6,7 @@ import {
   ConnectResult,
   Nudge,
   PushService,
+  UserInfo,
   Internal as I,
 } from './types'
 import { Internal as R } from './rest_client'
@@ -57,12 +58,10 @@ import { Internal as V } from './visitors'
  * // information that is returned:
  * const {
  *   userToken,
+ *   userInfo,
  *   badgeCount,
  *   bot: {
  *     id, title, profilePicture
- *   },
- *   context: {
- *     any: 'value'
  *   }
  * } = info
  *
@@ -97,16 +96,12 @@ import { Internal as V } from './visitors'
  *
  * // open the chat by visiting the webview URL:
  * bubble.getWebviewUrl()
- * ```
  *
- * Still to implement:
- *
- * ```
  * // configure push token
- * bubble.configurePushToken('pushwoosh', '<token data>')
+ * await bubble.configurePushToken('pushwoosh', '<token data>')
  *
- * // get the URL for the chat when clicking on a nudge
- * bubble.getWebviewUrl(nudge)
+ * // send extra user information to the bot
+ * await bubble.putUserInfo({ first_name: "john", last_name: "doe", visitor_id: "12345" })
  * ```
  */
 export class ChatBubble {
@@ -118,6 +113,7 @@ export class ChatBubble {
 
   private bot?: I.BotAPIResponse
   private userToken?: string
+  private userInfo: UserInfo | null = null
   private restClient: R.RESTClient
   private postConnect: (() => void)[] = []
 
@@ -161,21 +157,26 @@ export class ChatBubble {
 
     // join conversations channel, for badge count, context and delegate token
     const joinResponse = await this.conversations.join()
-    const { userToken, badgeCount, context } = joinResponse
+    const { userToken, badgeCount, userInfo } = joinResponse
     this.userToken = userToken
+    this.userInfo = userInfo
 
     // join visitors channel, for live presence and tracking page views
     this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher)
     await this.visitors.join()
 
     // send any pending request
-    this.postConnect.forEach(callback => callback())
+    try {
+      await Promise.all(this.postConnect.map(callback => callback()))
+    } catch (e) {
+      // console.log('Error in postconnect callback', e);
+    }
     this.postConnect = []
 
     return {
       userToken,
       badgeCount,
-      context,
+      userInfo: this.userInfo,
       bot: {
         id: bot.id,
         title: bot.title,
@@ -267,20 +268,35 @@ export class ChatBubble {
    *
    * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
    */
-  public registerPushToken(type: PushService, data: any) {
+  registerPushToken(type: PushService, data: any) {
     return this.whenConnected<I.PushRegisterAPIResponse>(
       () => this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
     )
   }
 
+  /**
+   * Push a user information update to the Botsquad platform.
+   *
+   * For any subsequent new chatbot conversation, the information provided in this API call will be
+   * available in Bubblescript under the `user.*` variable namespace.
+   */
+  putUserInfo(info: UserInfo) {
+    return this.whenConnected<UserInfo>(
+      async () => {
+        this.userInfo = await this.conversations.putUserInfo(info)
+        return this.userInfo
+      }
+    )
+  }
+
   ///
 
-  private whenConnected<T>(callback: () => Promise<T>) {
+  private whenConnected<T>(callback: () => Promise<T>): Promise<T> {
     if (this.userToken) {
       return callback()
     } else {
       return new Promise(resolve => {
-        this.postConnect.push(() => resolve(callback()))
+        this.postConnect.push(async () => resolve(await callback()))
       })
     }
   }

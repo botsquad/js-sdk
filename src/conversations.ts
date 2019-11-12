@@ -4,6 +4,7 @@ import { promisify } from './channel'
 
 import {
   Config,
+  UserInfo,
   Internal as I
 } from './types'
 
@@ -30,9 +31,15 @@ export namespace Internal {
       return {
         userId: response.user_id,
         userToken: response.delegate_token,
+        userInfo: response.user,
         badgeCount,
-        context: {}
       }
+    }
+
+    putUserInfo(info: UserInfo) {
+      return promisify<UserInfo>(
+        () => this.channel.push('put_user_info', { info })
+      )
     }
 
     ///

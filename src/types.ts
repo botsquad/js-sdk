@@ -40,15 +40,42 @@ export interface ConnectResult {
   /** The current badge count that should be displayed on the chat bubble. */
   badgeCount: number
 
+  /** The currently known information about the user. Will be `undefined` when the user is not yet known in the system. */
+  userInfo: UserInfo | null
+
   /** The bot details. These can be used to create the chat bubble. */
   bot: {
     id: string
     title: string
     profilePicture: string
   }
+}
 
-  /** The current user's context. */
-  context: Record<string, any>
+/**
+ * Contains the information that is known about the user.
+ *
+ * Any key / value properties can be set in the information, using [[ChatBubble.putUserInfo]]. The
+ * properties listed here are special, in the sense that they are used by the platform. Some
+ * properties (tags, frontend) cannot be updated through the `putUserInfo` call.
+ */
+export interface UserInfo extends Record<string, any> {
+  /** A list of tags set on the user */
+  tags?: string[]
+  /** The primary channel that the user users to chat with the bot */
+  frontend?: string
+  /** The users's first name */
+  first_name?: string
+  /** The users's last name */
+  last_name?: string
+  /** URL of the profile picture */
+  profile_picture?: string
+  /** The users's timezone */
+  timezone?: string
+  /**
+   * The user's locale. Note that this locale can be different than the one that is passed in to
+   * [[ChatBubble]]; the bot might have decided to switch locale.
+   */
+  locale?: string
 }
 
 /** Information about a "nudge"; a small piece of information that is shown to get the user to engage with the chatbot. */
@@ -90,12 +117,13 @@ export namespace Internal {
     userToken: string
     userId: string
     badgeCount: number
-    context: Record<string, any>
+    userInfo: UserInfo | null
   }
 
   export interface ConversationsChannelJoinResponse {
     delegate_token: string
     user_id: string
+    user: UserInfo | null
   }
 
   export interface Conversation {
