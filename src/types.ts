@@ -88,6 +88,8 @@ export interface Nudge {
   caption?: string
   /** A profile picture */
   profile_picture?: string
+  /** The conversation identifier */
+  g?: string
 }
 
 /** Enumeration of the supported push notification providers */

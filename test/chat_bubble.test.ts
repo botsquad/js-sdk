@@ -2,6 +2,8 @@ import { ChatBubble } from '../src'
 import { Config, Nudge, PushService } from '../src/types'
 import 'whatwg-fetch' // polyfill for jest
 
+const USER_AGENT = `botsquad-sdk-testsuite/0.0`
+
 declare global {
   namespace jest {
     interface Matchers<R> {
@@ -33,7 +35,7 @@ describe('ChatBubble instantiation', () => {
     expect(
       () =>
         new ChatBubble({
-          userAgent: 'foo/1.0',
+          userAgent: USER_AGENT,
           botId: ''
         })
     ).toThrow(/parameter missing/)
@@ -42,7 +44,7 @@ describe('ChatBubble instantiation', () => {
   it('constructor OK', () => {
     expect(
       new ChatBubble({
-        userAgent: 'foo/1.0',
+        userAgent: USER_AGENT,
         botId: 'fdsf809ds8f09dsf'
       })
     ).toBeInstanceOf(ChatBubble)
@@ -50,7 +52,7 @@ describe('ChatBubble instantiation', () => {
 
   it('sets default hostname', () => {
     const bubble = new ChatBubble({
-      userAgent: 'foo/1.0',
+      userAgent: USER_AGENT,
       botId: 'fdsf809ds8f09dsf'
     })
 
@@ -61,7 +63,7 @@ describe('ChatBubble instantiation', () => {
 
 const VALID_JOIN_PARAMS: Config = {
   botId: 'e222b5b3-9d36-4de6-bfc8-ebb93292521d',
-  userAgent: 'foo/1.0 (Android 6.0)',
+  userAgent: USER_AGENT + ' (Android 6.0)',
   hostname: 'staging.bsqd.me'
 }
 
@@ -89,6 +91,8 @@ describe('ChatBubble connection', () => {
     expect(info.bot.profilePicture).toMatch(/^https:\/\/s3.eu-west-1.amazonaws.com/)
 
     expect(bubble.getWebviewUrl()).toMatch(/^https:\/\/cbl.staging.bsqd.me/)
+    expect(bubble.getWebviewUrl()).toMatch(/#\/g\/main$/)
+    expect(bubble.getWebviewUrl('asdf')).toMatch(/#\/g\/asdf$/)
 
     await bubble.disconnect()
   })

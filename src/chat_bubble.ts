@@ -245,13 +245,13 @@ export class ChatBubble {
    * Returns `null` when not connected or when the configured but does not have a publicly
    * accessible web interface.
    */
-  getWebviewUrl(): string | null {
+  getWebviewUrl(g?: string): string | null {
     if (!this.bot?.web_pwa?.id) return null
     let url = `http${this.config.secure ? 's' : ''}://`
 
     const { id, is_subdomain } = this.bot.web_pwa
     const { hostname } = this.config
-    if ( is_subdomain) {
+    if (is_subdomain) {
       url += `${id}.${hostname}`
     } else {
       url += id
@@ -260,6 +260,7 @@ export class ChatBubble {
     if (this.userToken) {
       url += `?u=${this.userToken || ''}`
     }
+    url += `#/g/${g || 'main'}`
     return url
   }
 
