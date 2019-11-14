@@ -13,7 +13,7 @@ export namespace Internal {
   export class Conversations {
     private channel: Channel
     private presence?: Presence
-    private currentBadgeCount?: number
+    private currentBadgeCount = 0
     public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
 
     constructor(socket: Socket, config: Config) {
@@ -26,13 +26,13 @@ export namespace Internal {
       const response = await this.joinChannel()
       this.presence = new Presence(this.channel)
       this.presence.onSync(this.syncPresence)
-      const badgeCount = await this.getBadgeCount()
+      this.currentBadgeCount = await this.getBadgeCount()
 
       return {
         userId: response.user_id,
         userToken: response.delegate_token,
         userInfo: response.user,
-        badgeCount,
+        badgeCount: this.currentBadgeCount,
       }
     }
 
@@ -40,6 +40,10 @@ export namespace Internal {
       return promisify<UserInfo>(
         () => this.channel.push('put_user_info', { info })
       )
+    }
+
+    getCurrentBadgeCount() {
+      return this.currentBadgeCount
     }
 
     ///

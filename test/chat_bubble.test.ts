@@ -210,6 +210,25 @@ describe('ChatBubble push notifications', () => {
   })
 })
 
+
+describe('ChatBubble badge count', () => {
+  it('badge count callback invoked after subscription', async () => {
+    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
+
+    const info = await bubble.connect()
+    expect(typeof info.badgeCount).toBe('number')
+
+    return new Promise(resolve => {
+      bubble.onBadgeCountUpdate.subscribe(count => {
+        expect(typeof count).toBe('number')
+        expect(count).toEqual(0)
+
+        resolve()
+      })
+    })
+  })
+})
+
 describe('ChatBubble nudges', () => {
   it('can receive and engage with nudges', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)

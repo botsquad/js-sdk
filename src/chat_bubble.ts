@@ -212,8 +212,19 @@ export class ChatBubble {
 
   /**
    * Subscribe to updates to the badge counter in the chat bubble.
+   *
+   * Usage:
+   * ```
+   * bubble.onBadgeCountUpdate.subscribe(count => console.log(`Count updated: ${count}`))
+   * ```
+   *
+   * When you subscribe to the badge count update, the callback is invoked right away with the
+   * current badge count value.
    */
   get onBadgeCountUpdate() {
+    setImmediate(() => {
+      this.conversations.onBadgeCountUpdate.dispatch(this.conversations.getCurrentBadgeCount())
+    })
     return this.conversations.onBadgeCountUpdate.asEvent()
   }
 
