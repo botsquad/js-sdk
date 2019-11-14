@@ -201,8 +201,13 @@ export class ChatBubble {
   }
 
   /**
-   * Send a page view event to the server. Use this to track on which page of the website your user
-   * is currently visiting. In the backend this is used to show a realtime view of current visitors.
+   * Send a page view event to the server.
+   *
+   * Use this to track on which page of the website your user is currently visiting. In the backend
+   * this is used to show a realtime view of current visitors.
+
+   * @param url   The URL of the current page. This parameter needs to be a valid URL, in the form of `scheme://hostname/path`. For native apps, use something like `app://app-package-name/current-screen`. If your native app supports [Android app links](https://developer.android.com/training/app-links/) or [iOS Universal links](https://developer.apple.com/ios/universal-links/), you can also send these.
+   * @param title The title of the current page or app screen.
    */
   async sendPageView(url: string, title: string) {
     return this.whenConnected<{}>(
