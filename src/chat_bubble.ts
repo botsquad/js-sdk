@@ -5,6 +5,7 @@ import {
   Config,
   ConnectResult,
   Nudge,
+  Event,
   PushService,
   UserInfo,
   Internal as I,
@@ -110,6 +111,7 @@ export class ChatBubble {
   private conversations: C.Conversations
   private visitors?: V.Visitors
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
+  private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
   private bot?: I.BotAPIResponse
   private userToken?: string
@@ -162,7 +164,7 @@ export class ChatBubble {
     this.userInfo = userInfo
 
     // join visitors channel, for live presence and tracking page views
-    this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher)
+    this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
     await this.visitors.join()
 
     // send any pending request
@@ -239,6 +241,14 @@ export class ChatBubble {
    */
   get onNudge() {
     return this.onNudgeDispatcher.asEvent()
+  }
+
+  /**
+   * Subscribe to any events that are sent from the server. From within a bot, an event can be
+   * emitted to the chat bubble, by doing `emit "name", to: :chat_bubble` in BubbleScript.
+   */
+  get onEvent() {
+    return this.onEventDispatcher.asEvent()
   }
 
   /**

@@ -92,6 +92,16 @@ export interface Nudge {
   g?: string
 }
 
+/** An event that is being received by the chat bubble. */
+export interface Event {
+  /** The name of the event */
+  name: string
+  /** The sender of the event */
+  sender: string
+  /** The event's payload */
+  payload?: any
+}
+
 /** Enumeration of the supported push notification providers */
 export enum PushService {
   WEB_PUSH = 'web-push',
@@ -112,6 +122,10 @@ export namespace Internal {
     web_pwa: {
       id: string
       is_subdomain: boolean
+    }
+    web_widget: {
+      visitors: boolean
+      visitors_sdk_only: boolean
     }
   }
 
@@ -161,6 +175,12 @@ export namespace Internal {
 
   export interface VisitorsNudge {
     id: string
+    json: string
+  }
+
+  export interface VisitorsEvent {
+    name: string
+    sender: string
     json: string
   }
 
