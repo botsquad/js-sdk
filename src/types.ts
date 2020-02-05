@@ -92,6 +92,11 @@ export interface Nudge {
   g?: string
   /** The bot event that should be sent to the conversation */
   bot_event: Event
+  /** Show a textual input with this nudge */
+  text_input?: {
+    enabled: boolean
+    placeholder: string
+  }
 }
 
 /** An event that is being received by the chat bubble. */
