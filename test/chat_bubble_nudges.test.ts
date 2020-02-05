@@ -58,6 +58,8 @@ describe('ChatBubble nudges', () => {
     })
 
     expect(nudge.message).toEqual('You scrolled down')
+
+    await bubble.sendChatOpenState(true)
   })
 
 })

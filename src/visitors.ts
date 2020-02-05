@@ -37,6 +37,12 @@ export namespace Internal {
       )
     }
 
+    async sendChatOpenState(open: boolean) {
+      return promisify<{}>(
+        () => this.channel.push('chat_open', { open })
+      )
+    }
+
     async nudgeResponse(nudge: Nudge, action: I.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
       const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(

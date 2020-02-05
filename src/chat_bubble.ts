@@ -233,6 +233,17 @@ export class ChatBubble {
   }
 
   /**
+   * Report the opened state of the chat back to the chat bubble
+   *
+   * While the chat is opened, nudges will be suspended from triggering.
+   */
+  async sendChatOpenState(open: boolean) {
+    return this.whenConnected<{}>(
+      () => this.visitors?.sendChatOpenState(open) || Promise.reject()
+    )
+  }
+
+  /**
    * Subscribe to updates to the badge counter in the chat bubble.
    *
    * Usage:
