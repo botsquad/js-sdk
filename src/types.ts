@@ -135,6 +135,7 @@ export namespace Internal {
     profile_picture: string
     locale: string
     extra_locales: string[]
+    ui_labels: any
     web_pwa: {
       id: string
       is_subdomain: boolean
