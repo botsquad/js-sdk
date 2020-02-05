@@ -115,6 +115,10 @@ export enum PushService {
 // Botsquad websocket / REST API responses
 export namespace Internal {
 
+  export interface ChatConfig {
+    disabled_inputs: string[]
+  }
+
   export interface BotAPIResponseWebWidget {
     visitors: boolean
     visitors_sdk_only: boolean
@@ -140,6 +144,7 @@ export namespace Internal {
       extra_css?: string
       extra_js?: string
       powered_by?: boolean | { text: string, url: string }
+      chat_config?: ChatConfig
       home?: {
         image_url?: string
         title?: string
