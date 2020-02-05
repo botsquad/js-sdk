@@ -137,8 +137,16 @@ export namespace Internal {
     }
     web_widget: BotAPIResponseWebWidget
     widget: {
-      extra_css: string
-      extra_js: string
+      extra_css?: string
+      extra_js?: string
+      powered_by?: boolean | { text: string, url: string }
+      home?: {
+        image_url?: string
+        title?: string
+        description?: string
+        conversation_cta?: string
+        team_message?: string
+      }
     }
   }
 
