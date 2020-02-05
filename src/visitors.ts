@@ -31,6 +31,12 @@ export namespace Internal {
       )
     }
 
+    async sendPageScroll(percentage: number) {
+      return promisify<{}>(
+        () => this.channel.push('scroll', { percentage })
+      )
+    }
+
     async nudgeResponse(nudge: Nudge, action: I.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
       const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(

@@ -222,6 +222,17 @@ export class ChatBubble {
   }
 
   /**
+   * Send a page scroll percentage to the server
+   *
+   * Nudges can be triggered when the page has scrolled to a certain percentage.
+   */
+  async sendPageScroll(percentage: number) {
+    return this.whenConnected<{}>(
+      () => this.visitors?.sendPageScroll(percentage) || Promise.reject()
+    )
+  }
+
+  /**
    * Subscribe to updates to the badge counter in the chat bubble.
    *
    * Usage:
