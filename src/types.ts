@@ -119,6 +119,9 @@ export namespace Internal {
     visitors: boolean
     visitors_sdk_only: boolean
     domains: string[]
+    main_color: string
+    icon_url: string
+    layout: 'normal' | 'large' | 'fullscreen'
   }
 
   export interface BotAPIResponse {
