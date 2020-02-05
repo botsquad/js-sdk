@@ -1,6 +1,6 @@
 import { Socket, Channel } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
-import { Config, Nudge, Event, Internal as I } from './types'
+import { Config, Nudge, Event, ExtendedNudgeResponse, Internal as I } from './types'
 import { promisify } from './channel'
 import * as packageJson from '../package.json'
 
@@ -31,8 +31,8 @@ export namespace Internal {
       )
     }
 
-    async nudgeResponse(nudge: Nudge, response: I.NudgeResponse): Promise<void> {
-      const payload = { action: response, nudge_id: nudge.id }
+    async nudgeResponse(nudge: Nudge, action: I.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
+      const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(
         () => this.channel.push('nudge_response', payload)
       )

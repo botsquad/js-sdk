@@ -5,6 +5,7 @@ import {
   Config,
   ConnectResult,
   Nudge,
+  ExtendedNudgeResponse,
   Event,
   PushService,
   UserInfo,
@@ -164,9 +165,11 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-    // join visitors channel, for live presence and tracking page views
-    this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
-    await this.visitors.join()
+    if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
+      // join visitors channel, for live presence and tracking page views
+      this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
+      await this.visitors.join()
+    }
 
     // send any pending request
     try {
@@ -214,7 +217,7 @@ export class ChatBubble {
    */
   async sendPageView(url: string, title: string) {
     return this.whenConnected<{}>(
-      () => this.visitors!.sendPageView(url, title)
+      () => this.visitors?.sendPageView(url, title) || Promise.reject()
     )
   }
 
@@ -262,8 +265,8 @@ export class ChatBubble {
   /**
    * Signal the server that the user has engaged with a nudge.
    */
-  nudgeEngage(nudge: Nudge): Promise<void> {
-    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.ENGAGE) || Promise.reject()
+  nudgeEngage(nudge: Nudge, response?: ExtendedNudgeResponse): Promise<void> {
+    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.ENGAGE, response) || Promise.reject()
   }
 
   /**

@@ -99,6 +99,10 @@ export interface Nudge {
   }
 }
 
+export interface ExtendedNudgeResponse {
+  text_input?: string
+}
+
 /** An event that is being received by the chat bubble. */
 export interface Event {
   /** The name of the event */
