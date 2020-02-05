@@ -28,6 +28,7 @@ import { Internal as V } from './visitors'
  *  - Send 'page view' events to indicate on which page the bubble is being displayed
  *  - Configure the (web)app's push token
  *  - Handle in-app nudges and allow the user to engage with these.
+ *  - Receive events that are sent from the bot
  *
  * ## Getting started
  *

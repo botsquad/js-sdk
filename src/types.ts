@@ -90,6 +90,8 @@ export interface Nudge {
   profile_picture?: string
   /** The conversation identifier */
   g?: string
+  /** The bot event that should be sent to the conversation */
+  bot_event: Event
 }
 
 /** An event that is being received by the chat bubble. */
@@ -97,7 +99,7 @@ export interface Event {
   /** The name of the event */
   name: string
   /** The sender of the event */
-  sender: string
+  sender?: string
   /** The event's payload */
   payload?: any
 }
@@ -113,6 +115,12 @@ export enum PushService {
 // Botsquad websocket / REST API responses
 export namespace Internal {
 
+  export interface BotAPIResponseWebWidget {
+    visitors: boolean
+    visitors_sdk_only: boolean
+    domains: string[]
+  }
+
   export interface BotAPIResponse {
     id: string
     title: string
@@ -123,9 +131,10 @@ export namespace Internal {
       id: string
       is_subdomain: boolean
     }
-    web_widget: {
-      visitors: boolean
-      visitors_sdk_only: boolean
+    web_widget: BotAPIResponseWebWidget
+    widget: {
+      extra_css: string
+      extra_js: string
     }
   }
 
