@@ -127,6 +127,7 @@ export namespace Internal {
   export interface BotAPIResponse {
     id: string
     title: string
+    purpose: string
     profile_picture: string
     locale: string
     extra_locales: string[]
