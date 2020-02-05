@@ -217,6 +217,7 @@ export namespace Internal {
   }
 
   export enum NudgeResponse {
+    SHOW = 'show',
     ENGAGE = 'engage',
     DISCARD = 'discard'
   }

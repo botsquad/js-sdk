@@ -125,10 +125,10 @@ export class ChatBubble {
    */
   constructor(config: Config) {
     if (!config.userAgent.length) {
-      throw(new Error('Required parameter missing: userAgent'))
+      throw (new Error('Required parameter missing: userAgent'))
     }
     if (!config.botId.length) {
-      throw(new Error('Required parameter missing: botId'))
+      throw (new Error('Required parameter missing: botId'))
     }
     config.locale = (config.locale || window?.navigator?.language || 'en').replace('-', '_')
     config.timezone = config.timezone || window?.Intl?.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Amsterdam'
@@ -250,6 +250,13 @@ export class ChatBubble {
    */
   get onEvent() {
     return this.onEventDispatcher.asEvent()
+  }
+
+  /**
+   * Signal the server that the user has seen the nudge.
+   */
+  nudgeShown(nudge: Nudge): Promise<void> {
+    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.SHOW) || Promise.reject()
   }
 
   /**

@@ -21,6 +21,7 @@ describe('ChatBubble nudges', () => {
 
     expect(nudge.message).toMatch(/Hello there from the nudges/)
 
+    await bubble.nudgeShown(nudge)
     await bubble.nudgeEngage(nudge)
     await bubble.nudgeDiscard(nudge)
   })
