@@ -5,12 +5,12 @@ import { promisify } from './channel'
 import {
   Config,
   UserInfo,
-  Internal as I
+  API
 } from './types'
 
-export namespace Internal {
+export namespace Conversations {
 
-  export class Conversations {
+  export class Manager {
     private channel: Channel
     private presence?: Presence
     private currentBadgeCount = 0
@@ -22,7 +22,7 @@ export namespace Internal {
       this.channel = socket.channel(`conversations:${botId}`, { delegate_token: userToken })
     }
 
-    async join(): Promise<I.ConversationsJoinResponse> {
+    async join(): Promise<API.ConversationsJoinResponse> {
       const response = await this.joinChannel()
       this.presence = new Presence(this.channel)
       this.presence.onSync(this.syncPresence)
@@ -54,7 +54,7 @@ export namespace Internal {
     }
 
     private async joinChannel() {
-      return promisify<I.ConversationsChannelJoinResponse>(
+      return promisify<API.ConversationsChannelJoinResponse>(
         () => this.channel.join()
       )
     }
@@ -68,7 +68,7 @@ export namespace Internal {
     }
 
     private retrieveConversations() {
-      return promisify<I.ConversationsListResponse>(
+      return promisify<API.ConversationsListResponse>(
         () => this.channel.push('list_conversations', {})
       )
     }

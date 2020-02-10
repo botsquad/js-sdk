@@ -9,11 +9,11 @@ import {
   Event,
   PushService,
   UserInfo,
-  Internal as I,
+  API,
 } from './types'
-import { Internal as R } from './rest_client'
-import { Internal as C } from './conversations'
-import { Internal as V } from './visitors'
+import { REST as R } from './rest_client'
+import { Conversations as C } from './conversations'
+import { Visitors as V } from './visitors'
 
 /**
  * # ChatBubble
@@ -110,15 +110,15 @@ import { Internal as V } from './visitors'
 export class ChatBubble {
   private config: Config
   private socket: Socket
-  private conversations: C.Conversations
-  private visitors?: V.Visitors
+  private conversations: C.Manager
+  private visitors?: V.Manager
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
   private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
-  private bot?: I.BotAPIResponse
+  private bot?: API.BotResponse
   private userToken?: string
   private userInfo: UserInfo | null = null
-  private restClient: R.RESTClient
+  private restClient: R.Client
   private postConnect: (() => void)[] = []
 
   /**
@@ -137,8 +137,8 @@ export class ChatBubble {
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
 
     this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`)
-    this.restClient = new R.RESTClient(config)
-    this.conversations = new C.Conversations(this.socket, config)
+    this.restClient = new R.Client(config)
+    this.conversations = new C.Manager(this.socket, config)
     this.config = config
   }
 
@@ -155,7 +155,7 @@ export class ChatBubble {
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
     const botResult = this.restClient.getBotConfig(this.config.botId)
-    const [bot,] = await Promise.all<I.BotAPIResponse, void>([botResult, this.connectSocket()])
+    const [bot,] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
 
     this.bot = bot
 
@@ -167,7 +167,7 @@ export class ChatBubble {
 
     if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
       // join visitors channel, for live presence and tracking page views
-      this.visitors = new V.Visitors(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
+      this.visitors = new V.Manager(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
       await this.visitors.join()
     }
 
@@ -281,14 +281,14 @@ export class ChatBubble {
    * Signal the server that the user has seen the nudge.
    */
   nudgeShown(nudge: Nudge): Promise<void> {
-    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.SHOW) || Promise.reject()
+    return this.visitors?.nudgeResponse(nudge, API.NudgeResponse.SHOW) || Promise.reject()
   }
 
   /**
    * Signal the server that the user has engaged with a nudge.
    */
   nudgeEngage(nudge: Nudge, response?: ExtendedNudgeResponse): Promise<void> {
-    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.ENGAGE, response) || Promise.reject()
+    return this.visitors?.nudgeResponse(nudge, API.NudgeResponse.ENGAGE, response) || Promise.reject()
   }
 
   /**
@@ -296,7 +296,7 @@ export class ChatBubble {
    * again for this user.
    */
   nudgeDiscard(nudge: Nudge): Promise<void> {
-    return this.visitors?.nudgeResponse(nudge, I.NudgeResponse.DISCARD) || Promise.reject()
+    return this.visitors?.nudgeResponse(nudge, API.NudgeResponse.DISCARD) || Promise.reject()
   }
 
   /**
@@ -329,7 +329,7 @@ export class ChatBubble {
    * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
    */
   registerPushToken(type: PushService, data: any) {
-    return this.whenConnected<I.PushRegisterAPIResponse>(
+    return this.whenConnected<API.PushRegisterResponse>(
       () => this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
     )
   }

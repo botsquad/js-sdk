@@ -122,13 +122,15 @@ export enum PushService {
 }
 
 // Botsquad websocket / REST API responses
-export namespace Internal {
+export namespace API {
+
+  export type ChatInputPart = 'text' | 'location' | 'image' | 'file' | 'audio'
 
   export interface ChatConfig {
-    disabled_inputs: string[]
+    disabled_inputs: ChatInputPart[]
   }
 
-  export interface BotAPIResponseWebWidget {
+  export interface BotResponseWidget {
     visitors: boolean
     visitors_sdk_only: boolean
     domains: string[]
@@ -137,7 +139,50 @@ export namespace Internal {
     layout: 'normal' | 'large' | 'fullscreen'
   }
 
-  export interface BotAPIResponse {
+  export interface BotResponsePWA {
+    appearance: 'app' | 'basic'
+    ua_tracking_id?: string
+    vary?: string
+    manifest: {
+      theme_color: string
+      background_color?: string
+      display?: 'fullscreen' | 'standalone' | 'minimal-ui' | 'browser'
+      orientation?: string
+    }
+    intro_screen?: BotPWAScreen
+    start_screen?: {
+      home_buttons?: BotPWAScreen[]
+      image_url?: string
+      title?: string
+      description?: string
+      new_conversation_button?: boolean
+    }
+    splash_screen?: {
+      title?: string
+      description?: string
+      call_to_action?: string
+      footer?: string
+    }
+    chat_config?: ChatConfig
+    embed_chat_config?: ChatConfig
+    extra_js?: string
+    extra_css?: string
+  }
+
+  export interface BotPWAScreen {
+    type: 'conversation' | 'web_url'
+    chat_config?: ChatConfig
+    title: string
+    url?: string
+    icon?: string
+    image_url?: string
+    link_target?: string
+    g?: string
+    event?: Event
+    hide_input?: boolean
+  }
+
+  export interface BotResponse {
     id: string
     title: string
     purpose: string
@@ -149,7 +194,8 @@ export namespace Internal {
       id: string
       is_subdomain: boolean
     }
-    web_widget: BotAPIResponseWebWidget
+    pwa: BotResponsePWA
+    web_widget: BotResponseWidget
     widget: {
       extra_css?: string
       extra_js?: string
@@ -226,13 +272,13 @@ export namespace Internal {
     DISCARD = 'discard'
   }
 
-  export interface PushRegisterAPIRequest {
+  export interface PushRegisterRequest {
     type: PushService
     data: any
     delegate_token: string
   }
 
-  export interface PushRegisterAPIResponse {
+  export interface PushRegisterResponse {
     result: "OK"
   }
 }

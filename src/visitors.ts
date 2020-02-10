@@ -1,19 +1,19 @@
 import { Socket, Channel } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
-import { Config, Nudge, Event, ExtendedNudgeResponse, Internal as I } from './types'
+import { Config, Nudge, Event, ExtendedNudgeResponse, API } from './types'
 import { promisify } from './channel'
 import * as packageJson from '../package.json'
 
-export namespace Internal {
+export namespace Visitors {
   type OnNudge = SimpleEventDispatcher<Nudge>
   type OnEvent = SimpleEventDispatcher<Event>
 
-  export class Visitors {
+  export class Manager {
     private channel: Channel
     public onNudge: OnNudge
     public onEvent: OnEvent
 
-    constructor(socket: Socket, config: Config, conversationInfo: I.ConversationsJoinResponse, onNudge: OnNudge, onEvent: OnEvent) {
+    constructor(socket: Socket, config: Config, conversationInfo: API.ConversationsJoinResponse, onNudge: OnNudge, onEvent: OnEvent) {
       this.onNudge = onNudge
       this.onEvent = onEvent
       this.channel = socket.channel(`visitor:${config.botId}`, this.joinParams(config, conversationInfo))
@@ -21,7 +21,7 @@ export namespace Internal {
       this.channel.on('event', this.onReceiveEvent)
     }
 
-    async join(): Promise<I.VisitorsJoinResponse> {
+    async join(): Promise<API.VisitorsJoinResponse> {
       return this.joinChannel()
     }
 
@@ -43,7 +43,7 @@ export namespace Internal {
       )
     }
 
-    async nudgeResponse(nudge: Nudge, action: I.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
+    async nudgeResponse(nudge: Nudge, action: API.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
       const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(
         () => this.channel.push('nudge_response', payload)
@@ -52,7 +52,7 @@ export namespace Internal {
 
     ///
 
-    private joinParams(config: Config, conversationInfo: I.ConversationsJoinResponse): I.VisitorsJoinParams {
+    private joinParams(config: Config, conversationInfo: API.ConversationsJoinResponse): API.VisitorsJoinParams {
       return {
         visitor_id: conversationInfo.userId,
         user_agent: config.userAgent + ` (${packageJson.name}; ${packageJson.version})`,
@@ -61,20 +61,20 @@ export namespace Internal {
       }
     }
 
-    private async joinChannel(): Promise<I.VisitorsJoinResponse> {
-      return promisify<I.VisitorsJoinResponse>(
+    private async joinChannel(): Promise<API.VisitorsJoinResponse> {
+      return promisify<API.VisitorsJoinResponse>(
         () => this.channel.join()
       )
     }
 
-    private onReceiveNudge = ({ id, json }: I.VisitorsNudge) => {
+    private onReceiveNudge = ({ id, json }: API.VisitorsNudge) => {
       const nudge: Nudge = {
         id, ...JSON.parse(json)
       }
       this.onNudge.dispatch(nudge)
     }
 
-    private onReceiveEvent = ({ name, sender, json }: I.VisitorsEvent) => {
+    private onReceiveEvent = ({ name, sender, json }: API.VisitorsEvent) => {
       const event: Event = {
         name, sender, payload: JSON.parse(json)
       }
