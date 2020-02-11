@@ -148,6 +148,8 @@ describe('ChatBubble user info', () => {
     expect(result.timezone).toEqual("Europe/Amsterdam")
     expect(result.locale).toEqual("en")
 
+    expect(result).toEqual(bubble.getUserInfo())
+
     await bubble.disconnect()
 
     bubble = new ChatBubble({ userToken, ...VALID_JOIN_PARAMS })
@@ -162,9 +164,12 @@ describe('ChatBubble user info', () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
     bubble.putUserInfo({ foo: "12345" })
+    expect(bubble.getUserInfo()).toEqual(null)
 
     const { userInfo } = await bubble.connect()
     expect(userInfo!.foo).toEqual("12345")
+
+    expect(bubble.getUserInfo()).toEqual(userInfo)
   })
 
 })
@@ -202,7 +207,7 @@ describe('ChatBubble push notifications', () => {
   it('can register an Expo push token', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
     const r = bubble.registerPushToken(PushService.EXPO, 'xx').then(
-      r => expect(r).toEqual({ result: "OK"}))
+      r => expect(r).toEqual({ result: "OK" }))
 
     await bubble.connect()
 

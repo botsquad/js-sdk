@@ -349,6 +349,13 @@ export class ChatBubble {
     )
   }
 
+  /**
+   * Return the locally known information about the user.
+   */
+  getUserInfo() {
+    return this.userInfo
+  }
+
   ///
 
   private whenConnected<T>(callback: () => Promise<T>): Promise<T> {
