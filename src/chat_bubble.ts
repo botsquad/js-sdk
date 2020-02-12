@@ -111,7 +111,7 @@ export class ChatBubble {
   private config: Config
   private socket: Socket
   private conversations: C.Manager
-  private visitors?: V.Manager
+  private visitors: V.Manager | null = null
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
   private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
@@ -138,7 +138,7 @@ export class ChatBubble {
 
     this.socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`)
     this.restClient = new R.Client(config)
-    this.conversations = new C.Manager(this.socket, config)
+    this.conversations = new C.Manager(this.socket, config, this.onEventDispatcher)
     this.config = config
   }
 
@@ -168,7 +168,12 @@ export class ChatBubble {
     if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
       // join visitors channel, for live presence and tracking page views
       this.visitors = new V.Manager(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
-      await this.visitors.join()
+
+      try {
+        await this.visitors.join()
+      } catch (e) {
+        this.visitors = null
+      }
     }
 
     // send any pending request

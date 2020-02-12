@@ -5,21 +5,26 @@ import { promisify } from './channel'
 import {
   Config,
   UserInfo,
+  Event,
   API
 } from './types'
 
 export namespace Conversations {
+  type OnEvent = SimpleEventDispatcher<Event>
 
   export class Manager {
     private channel: Channel
     private presence?: Presence
     private currentBadgeCount = 0
     public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
+    public onEvent: OnEvent
 
-    constructor(socket: Socket, config: Config) {
+    constructor(socket: Socket, config: Config, onEvent: OnEvent) {
       let { botId, userToken } = config
       userToken = typeof userToken === 'string' && userToken.length ? userToken : undefined
+      this.onEvent = onEvent
       this.channel = socket.channel(`conversations:${botId}`, { delegate_token: userToken })
+      this.channel.on('event', this.onReceiveEvent)
     }
 
     async join(): Promise<API.ConversationsJoinResponse> {
@@ -71,6 +76,13 @@ export namespace Conversations {
       return promisify<API.ConversationsListResponse>(
         () => this.channel.push('list_conversations', {})
       )
+    }
+
+    private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {
+      const event: Event = {
+        name, sender, payload: JSON.parse(json)
+      }
+      this.onEvent.dispatch(event)
     }
   }
 }

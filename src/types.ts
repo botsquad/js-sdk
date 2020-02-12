@@ -260,7 +260,7 @@ export namespace API {
     json: string
   }
 
-  export interface VisitorsEvent {
+  export interface ChannelEvent {
     name: string
     sender: string
     json: string

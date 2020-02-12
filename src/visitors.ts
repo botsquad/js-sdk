@@ -74,7 +74,7 @@ export namespace Visitors {
       this.onNudge.dispatch(nudge)
     }
 
-    private onReceiveEvent = ({ name, sender, json }: API.VisitorsEvent) => {
+    private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {
       const event: Event = {
         name, sender, payload: JSON.parse(json)
       }
