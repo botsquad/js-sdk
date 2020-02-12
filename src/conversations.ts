@@ -20,10 +20,18 @@ export namespace Conversations {
     public onEvent: OnEvent
 
     constructor(socket: Socket, config: Config, onEvent: OnEvent) {
-      let { botId, userToken } = config
+      let { botId, userToken, userId } = config
       userToken = typeof userToken === 'string' && userToken.length ? userToken : undefined
+
+      let params = {}
+      if (typeof userId === 'string' && userId.length) {
+        params = { user_id: userId }
+      } else if (typeof userToken === 'string' && userToken.length) {
+        params = { delegate_token: userToken }
+      }
+
       this.onEvent = onEvent
-      this.channel = socket.channel(`conversations:${botId}`, { delegate_token: userToken })
+      this.channel = socket.channel(`conversations:${botId}`, params)
       this.channel.on('event', this.onReceiveEvent)
     }
 

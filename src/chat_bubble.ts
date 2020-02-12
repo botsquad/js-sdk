@@ -116,6 +116,7 @@ export class ChatBubble {
   private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
   private bot?: API.BotResponse
+  private userId?: string
   private userToken?: string
   private userInfo: UserInfo | null = null
   private restClient: R.Client
@@ -161,7 +162,8 @@ export class ChatBubble {
 
     // join conversations channel, for badge count, context and delegate token
     const joinResponse = await this.conversations.join()
-    const { userToken, badgeCount, userInfo } = joinResponse
+    const { userToken, userId, badgeCount, userInfo } = joinResponse
+    this.userId = userId
     this.userToken = userToken
     this.userInfo = userInfo
 
@@ -186,6 +188,7 @@ export class ChatBubble {
 
     return {
       userToken,
+      userId,
       badgeCount,
       userInfo: this.userInfo,
       bot: {
@@ -359,6 +362,13 @@ export class ChatBubble {
    */
   getUserInfo() {
     return this.userInfo
+  }
+
+  /**
+   * Return the current user ID of this connection
+   */
+  getUserId() {
+    return this.userId
   }
 
   ///

@@ -129,6 +129,18 @@ describe('ChatBubble connection', () => {
 
     expect(userToken).toEqual(token2)
   })
+
+  it('can use userId to connect', async () => {
+    const bubble = new ChatBubble({ userId: 'user001', ...VALID_JOIN_PARAMS })
+
+    const { userId, userToken } = await bubble.connect()
+
+    await bubble.disconnect()
+
+    expect(userId).toEqual('user001')
+    expect(bubble.getUserId()).toEqual('user001')
+    expect(userToken).not.toBe(undefined)
+  })
 })
 
 describe('ChatBubble user info', () => {

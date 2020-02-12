@@ -15,6 +15,12 @@ export interface Config {
   timezone?: string
 
   /**
+   * An application-specific user identifier. Mutually exclusive with `userToken`; if `userId` is
+   * set, `userToken` will be ignored.
+   */
+  userId?: string
+
+  /**
    * The token that identifiers this user. The first time a connection is made, the token can be
    * omitted, as it will be returned in the result of [[ChatBubble.connect]]. Each subsequent
    * `connect()` call should have this same userToken parameter, to ensure that the user is
@@ -36,6 +42,11 @@ export interface ConnectResult {
    * sessions.
    */
   userToken: string
+
+  /**
+   * The user's ID.
+   */
+  userId: string
 
   /** The current badge count that should be displayed on the chat bubble. */
   badgeCount: number
