@@ -1,5 +1,5 @@
 import { ChatBubble } from '../src'
-import { Config, Nudge, PushService } from '../src/types'
+import { Config } from '../src/types'
 import 'whatwg-fetch' // polyfill for jest
 
 const USER_AGENT = `botsquad-sdk-testsuite/0.0`
@@ -7,7 +7,7 @@ const USER_AGENT = `botsquad-sdk-testsuite/0.0`
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toError(value: RegExp): R;
+      toError(value: RegExp): R
     }
   }
 }
@@ -60,7 +60,6 @@ describe('ChatBubble instantiation', () => {
   })
 })
 
-
 export const VALID_JOIN_PARAMS: Config = {
   botId: 'e222b5b3-9d36-4de6-bfc8-ebb93292521d',
   userAgent: USER_AGENT + ' (Android 6.0)',
@@ -68,12 +67,12 @@ export const VALID_JOIN_PARAMS: Config = {
 }
 
 /*
-  const VALID_JOIN_PARAMS: Config = {
+export const VALID_JOIN_PARAMS: Config = {
   botId: '40d700a7-e643-43bf-a377-acab46ee9991',
   userAgent: 'foo/1.0 (Android 6.0)',
   hostname: 'localhost:4000',
   secure: false
-  }
+}
 */
 
 describe('ChatBubble connection', () => {
@@ -103,7 +102,7 @@ describe('ChatBubble connection', () => {
   })
 
   it('raises on invalid user token', () => {
-    const bubble = new ChatBubble({ userToken: "xxxxx", ...VALID_JOIN_PARAMS })
+    const bubble = new ChatBubble({ userToken: 'xxxxx', ...VALID_JOIN_PARAMS })
     return expect(bubble.connect()).rejects.toError(/Error decoding/)
   })
 
@@ -113,8 +112,8 @@ describe('ChatBubble connection', () => {
   })
 
   it('different bubbles get different tokens', async () => {
-    const { userToken: t1 } = await (new ChatBubble(VALID_JOIN_PARAMS)).connect()
-    const { userToken: t2 } = await (new ChatBubble(VALID_JOIN_PARAMS)).connect()
+    const { userToken: t1 } = await new ChatBubble(VALID_JOIN_PARAMS).connect()
+    const { userToken: t2 } = await new ChatBubble(VALID_JOIN_PARAMS).connect()
     expect(t1).not.toEqual(t2)
   })
 
@@ -139,12 +138,25 @@ describe('ChatBubble connection', () => {
 
     expect(userId).toEqual('user001')
     expect(bubble.getUserId()).toEqual('user001')
-    expect(userToken).not.toBe(undefined)
+  })
+
+  it('uses identical user token every time', async () => {
+    let bubble: ChatBubble
+
+    const params = { userId: '12345', ...VALID_JOIN_PARAMS }
+    bubble = new ChatBubble(params as Config)
+    const { userToken: a } = await bubble.connect()
+    await bubble.disconnect()
+
+    bubble = new ChatBubble(params as Config)
+    const { userToken: b } = await bubble.connect()
+    await bubble.disconnect()
+
+    expect(a).toEqual(b)
   })
 })
 
 describe('ChatBubble user info', () => {
-
   it('can store user info', async () => {
     let bubble: ChatBubble
 
@@ -152,13 +164,17 @@ describe('ChatBubble user info', () => {
     const { userToken, userInfo } = await bubble.connect()
     expect(userInfo).toEqual(null)
 
-    const result = await bubble.putUserInfo({ first_name: "SDK test user", last_name: "Lastname", foo: "bar" })
+    const result = await bubble.putUserInfo({
+      first_name: 'SDK test user',
+      last_name: 'Lastname',
+      foo: 'bar'
+    })
 
-    expect(result.first_name).toEqual("SDK test user")
-    expect(result.last_name).toEqual("Lastname")
-    expect(result.foo).toEqual("bar")
-    expect(result.timezone).toEqual("Europe/Amsterdam")
-    expect(result.locale).toEqual("en")
+    expect(result.first_name).toEqual('SDK test user')
+    expect(result.last_name).toEqual('Lastname')
+    expect(result.foo).toEqual('bar')
+    expect(result.timezone).toEqual('Europe/Amsterdam')
+    expect(result.locale).toEqual('en')
 
     expect(result).toEqual(bubble.getUserInfo())
 
@@ -167,27 +183,25 @@ describe('ChatBubble user info', () => {
     bubble = new ChatBubble({ userToken, ...VALID_JOIN_PARAMS })
     const { userInfo: info } = await bubble.connect()
 
-    expect(info!.first_name).toEqual("SDK test user")
-    expect(info!.last_name).toEqual("Lastname")
-    expect(info!.foo).toEqual("bar")
+    expect(info!.first_name).toEqual('SDK test user')
+    expect(info!.last_name).toEqual('Lastname')
+    expect(info!.foo).toEqual('bar')
   })
 
   it('can send user info before connect', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
-    bubble.putUserInfo({ foo: "12345" })
+    bubble.putUserInfo({ foo: '12345' })
     expect(bubble.getUserInfo()).toEqual(null)
 
     const { userInfo } = await bubble.connect()
-    expect(userInfo!.foo).toEqual("12345")
+    expect(userInfo!.foo).toEqual('12345')
 
     expect(bubble.getUserInfo()).toEqual(userInfo)
   })
-
 })
 
 describe('ChatBubble page views', () => {
-
   it('can send page view', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
@@ -202,8 +216,9 @@ describe('ChatBubble page views', () => {
 
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
-    const a = bubble.sendPageView('https://example.com', 'My first page').then(
-      result => expect(result).toEqual({}))
+    const a = bubble
+      .sendPageView('https://example.com', 'My first page')
+      .then(result => expect(result).toEqual({}))
 
     // errors before connect are ignored
     bubble.sendPageView('xxbla', 'invalid page')
@@ -212,30 +227,7 @@ describe('ChatBubble page views', () => {
 
     return a
   })
-
 })
-
-describe('ChatBubble push notifications', () => {
-  it('can register an Expo push token', async () => {
-    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
-    const r = bubble.registerPushToken(PushService.EXPO, 'xx').then(
-      r => expect(r).toEqual({ result: "OK" }))
-
-    await bubble.connect()
-
-    return r
-  })
-
-  it('can register a Pushwoosh token', async () => {
-    const bubble = new ChatBubble(VALID_JOIN_PARAMS)
-    await bubble.connect()
-    await bubble.putUserInfo({ first_name: "Pushwoosh user" })
-
-    const r = await bubble.registerPushToken(PushService.PUSHWOOSH, 'xx')
-    expect(r.result).toEqual("OK")
-  })
-})
-
 
 describe('ChatBubble badge count', () => {
   it('badge count callback invoked after subscription', async () => {

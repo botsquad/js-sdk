@@ -13,7 +13,7 @@ export namespace REST {
     private endpoint: string
 
     constructor(config: Config) {
-      this.endpoint = `http${config.secure ? 's' : ''}://${config.hostname}/api/`
+      this.endpoint = `http${config.secure ? 's' : ''}://${config.hostname}/api`
     }
 
     public async getBotConfig(botId: string) {

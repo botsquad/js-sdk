@@ -134,7 +134,6 @@ export enum PushService {
 
 // Botsquad websocket / REST API responses
 export namespace API {
-
   export type ChatInputPart = 'text' | 'location' | 'image' | 'file' | 'audio'
 
   export interface ChatConfig {
@@ -210,7 +209,7 @@ export namespace API {
     widget: {
       extra_css?: string
       extra_js?: string
-      powered_by?: boolean | { text: string, url: string }
+      powered_by?: boolean | { text: string; url: string }
       chat_config?: ChatConfig
       home?: {
         image_url?: string
@@ -243,10 +242,20 @@ export namespace API {
     last_message_date: string
     read_until: string
     unread_message_count: number
+    operator?: Operator
   }
 
   export interface ConversationsListResponse {
     conversations: Conversation[]
+  }
+
+  export interface Operator {
+    id: string
+    name?: string
+    first_name?: string
+    last_name?: string
+    profile_picture?: string
+    status: 'online' | 'away' | 'offline'
   }
 
   export interface VisitorsJoinResponse {
@@ -290,6 +299,6 @@ export namespace API {
   }
 
   export interface PushRegisterResponse {
-    result: "OK"
+    result: 'OK'
   }
 }
