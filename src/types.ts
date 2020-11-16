@@ -144,9 +144,31 @@ export namespace API {
     visitors: boolean
     visitors_sdk_only: boolean
     domains: string[]
-    main_color: string
-    icon_url: string
-    layout: 'normal' | 'large' | 'fullscreen'
+  }
+
+  export interface BotResponseWidgetUI {
+    extra_css?: string
+    extra_js?: string
+    powered_by?: boolean | { text: string; url: string }
+    chat_config?: ChatConfig
+    home?: {
+      title?: string
+      description?: string
+      conversation_cta?: string
+      team_message?: string
+      whatsapp_cta?: string
+      phone_cta?: string
+      or_contact_via?: string
+    }
+    widget: {
+      mainColor?: string
+      iconUrl?: string
+      imageUrl?: string
+      disableChat?: boolean
+      whatsappNumber?: string
+      phoneNumber?: string
+      email?: string
+    }
   }
 
   export interface BotResponsePWA {
@@ -206,19 +228,7 @@ export namespace API {
     }
     pwa: BotResponsePWA
     web_widget: BotResponseWidget
-    widget: {
-      extra_css?: string
-      extra_js?: string
-      powered_by?: boolean | { text: string; url: string }
-      chat_config?: ChatConfig
-      home?: {
-        image_url?: string
-        title?: string
-        description?: string
-        conversation_cta?: string
-        team_message?: string
-      }
-    }
+    widget: BotResponseWidgetUI
   }
 
   export interface ConversationsJoinResponse {

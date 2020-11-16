@@ -167,7 +167,7 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-    if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
+     if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
       // join visitors channel, for live presence and tracking page views
       this.visitors = new V.Manager(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
 
