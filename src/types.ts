@@ -141,12 +141,12 @@ export namespace API {
   }
 
   export interface BotResponseWidget {
+    // from frontend
     visitors: boolean
     visitors_sdk_only: boolean
     domains: string[]
-  }
 
-  export interface BotResponseWidgetUI {
+    // from yaml
     extra_css?: string
     extra_js?: string
     powered_by?: boolean | { text: string; url: string }
@@ -172,6 +172,11 @@ export namespace API {
   }
 
   export interface BotResponsePWA {
+    // from frontend
+    id: string
+    is_subdomain: boolean
+
+    // from yaml
     appearance: 'app' | 'basic'
     ua_tracking_id?: string
     vary?: string
@@ -222,13 +227,8 @@ export namespace API {
     locale: string
     extra_locales: string[]
     ui_labels: any
-    web_pwa: {
-      id: string
-      is_subdomain: boolean
-    }
-    pwa: BotResponsePWA
-    web_widget: BotResponseWidget
-    widget: BotResponseWidgetUI
+    pwa?: BotResponsePWA
+    widget?: BotResponseWidget
   }
 
   export interface ConversationsJoinResponse {

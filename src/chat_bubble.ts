@@ -167,7 +167,7 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-     if (bot.web_widget.visitors || bot.web_widget.visitors_sdk_only) {
+     if (bot.widget?.visitors || bot.widget?.visitors_sdk_only) {
       // join visitors channel, for live presence and tracking page views
       this.visitors = new V.Manager(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
 
@@ -313,10 +313,10 @@ export class ChatBubble {
    * accessible web interface.
    */
   getWebviewUrl(g?: string): string | null {
-    if (!this.bot?.web_pwa?.id) return null
+    if (!this.bot?.pwa?.id) return null
     let url = `http${this.config.secure ? 's' : ''}://`
 
-    const { id, is_subdomain } = this.bot.web_pwa
+    const { id, is_subdomain } = this.bot.pwa
     const { hostname } = this.config
     if (is_subdomain) {
       url += `${id}.${hostname}`
