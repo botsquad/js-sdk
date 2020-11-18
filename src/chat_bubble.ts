@@ -115,7 +115,7 @@ export class ChatBubble {
   private onNudgeDispatcher = new SimpleEventDispatcher<Nudge>()
   private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
-  private bot?: API.BotResponse
+  public botResponse?: API.BotResponse
   private userId?: string
   private userToken?: string
   private userInfo: UserInfo | null = null
@@ -158,7 +158,7 @@ export class ChatBubble {
     const botResult = this.restClient.getBotConfig(this.config.botId)
     const [bot,] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
 
-    this.bot = bot
+    this.botResponse = bot
 
     // join conversations channel, for badge count, context and delegate token
     const joinResponse = await this.conversations.join()
@@ -313,10 +313,10 @@ export class ChatBubble {
    * accessible web interface.
    */
   getWebviewUrl(g?: string): string | null {
-    if (!this.bot?.pwa?.id) return null
+    if (!this.botResponse?.pwa?.id) return null
     let url = `http${this.config.secure ? 's' : ''}://`
 
-    const { id, is_subdomain } = this.bot.pwa
+    const { id, is_subdomain } = this.botResponse.pwa
     const { hostname } = this.config
     if (is_subdomain) {
       url += `${id}.${hostname}`
@@ -369,6 +369,16 @@ export class ChatBubble {
    */
   getUserId() {
     return this.userId
+  }
+
+  /**
+* Retrieve list of conversations for the current user
+*/
+  listConversations() {
+    return this.whenConnected<API.Conversation[]>(
+      async () =>
+        this.conversations.listConversations()
+    )
   }
 
   ///

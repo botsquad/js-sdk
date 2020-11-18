@@ -59,10 +59,17 @@ export namespace Conversations {
       return this.currentBadgeCount
     }
 
+    async listConversations() {
+      const { conversations } = await promisify<API.ConversationsListResponse>(
+        () => this.channel.push('list_conversations', {})
+      )
+      return conversations
+    }
+
     ///
 
     private async getBadgeCount() {
-      const { conversations } = await this.retrieveConversations()
+      const  conversations  = await this.listConversations()
       return conversations.reduce((count, conversation) => conversation.unread_message_count + count, 0)
     }
 
@@ -78,12 +85,6 @@ export namespace Conversations {
         this.currentBadgeCount = badgeCount
         this.onBadgeCountUpdate.dispatch(badgeCount)
       }
-    }
-
-    private retrieveConversations() {
-      return promisify<API.ConversationsListResponse>(
-        () => this.channel.push('list_conversations', {})
-      )
     }
 
     private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {

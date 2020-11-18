@@ -244,6 +244,10 @@ export namespace API {
     user: UserInfo | null
   }
 
+  export interface ConversationsListResponse {
+    conversations: Conversation[]
+  }
+
   export interface Conversation {
     g: string
     inserted_at: string
@@ -253,10 +257,6 @@ export namespace API {
     read_until: string
     unread_message_count: number
     operator?: Operator
-  }
-
-  export interface ConversationsListResponse {
-    conversations: Conversation[]
   }
 
   export interface Operator {
