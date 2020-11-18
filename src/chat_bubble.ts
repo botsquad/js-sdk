@@ -9,7 +9,7 @@ import {
   Event,
   PushService,
   UserInfo,
-  API,
+  API
 } from './types'
 import { REST as R } from './rest_client'
 import { Conversations as C } from './conversations'
@@ -128,13 +128,16 @@ export class ChatBubble {
    */
   constructor(config: Config) {
     if (!config.userAgent.length) {
-      throw (new Error('Required parameter missing: userAgent'))
+      throw new Error('Required parameter missing: userAgent')
     }
     if (!config.botId.length) {
-      throw (new Error('Required parameter missing: botId'))
+      throw new Error('Required parameter missing: botId')
     }
     config.locale = (config.locale || window?.navigator?.language || 'en').replace('-', '_')
-    config.timezone = config.timezone || window?.Intl?.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Amsterdam'
+    config.timezone =
+      config.timezone ||
+      window?.Intl?.DateTimeFormat().resolvedOptions().timeZone ||
+      'Europe/Amsterdam'
     config.hostname = config.hostname || 'bsqd.me'
     config.secure = typeof config.secure === 'undefined' ? true : !!config.secure
 
@@ -157,7 +160,7 @@ export class ChatBubble {
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
     const botResult = this.restClient.getBotConfig(this.config.botId)
-    const [bot,] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
+    const [bot] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
 
     this.botResponse = bot
 
@@ -168,9 +171,15 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-     if (bot.widget?.visitors || bot.widget?.visitors_sdk_only) {
+    if (bot.widget?.visitors || bot.widget?.visitors_sdk_only) {
       // join visitors channel, for live presence and tracking page views
-      this.visitors = new V.Manager(this.socket, this.config, joinResponse, this.onNudgeDispatcher, this.onEventDispatcher)
+      this.visitors = new V.Manager(
+        this.socket,
+        this.config,
+        joinResponse,
+        this.onNudgeDispatcher,
+        this.onEventDispatcher
+      )
 
       try {
         await this.visitors.join()
@@ -204,15 +213,13 @@ export class ChatBubble {
    * Close the connection to the server, if it was opened.
    */
   async disconnect(): Promise<void> {
-    return new Promise(
-      resolve => {
-        if (!this.socket.isConnected()) {
-          resolve()
-        } else {
-          this.socket.disconnect(resolve)
-        }
+    return new Promise(resolve => {
+      if (!this.socket.isConnected()) {
+        resolve()
+      } else {
+        this.socket.disconnect(resolve)
       }
-    )
+    })
   }
 
   /**
@@ -225,9 +232,7 @@ export class ChatBubble {
    * @param title The title of the current page or app screen.
    */
   async sendPageView(url: string, title: string) {
-    return this.whenConnected<{}>(
-      () => this.visitors?.sendPageView(url, title) || Promise.reject()
-    )
+    return this.whenConnected<{}>(() => this.visitors?.sendPageView(url, title) || Promise.reject())
   }
 
   /**
@@ -247,9 +252,7 @@ export class ChatBubble {
    * While the chat is opened, nudges will be suspended from triggering.
    */
   async sendChatOpenState(open: boolean) {
-    return this.whenConnected<{}>(
-      () => this.visitors?.sendChatOpenState(open) || Promise.reject()
-    )
+    return this.whenConnected<{}>(() => this.visitors?.sendChatOpenState(open) || Promise.reject())
   }
 
   /**
@@ -297,7 +300,9 @@ export class ChatBubble {
    * Signal the server that the user has engaged with a nudge.
    */
   nudgeEngage(nudge: Nudge, response?: ExtendedNudgeResponse): Promise<void> {
-    return this.visitors?.nudgeResponse(nudge, API.NudgeResponse.ENGAGE, response) || Promise.reject()
+    return (
+      this.visitors?.nudgeResponse(nudge, API.NudgeResponse.ENGAGE, response) || Promise.reject()
+    )
   }
 
   /**
@@ -338,8 +343,8 @@ export class ChatBubble {
    * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
    */
   registerPushToken(type: PushService, data: any) {
-    return this.whenConnected<API.OkResponse>(
-      () => this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
+    return this.whenConnected<API.OkResponse>(() =>
+      this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
     )
   }
 
@@ -350,12 +355,10 @@ export class ChatBubble {
    * available in Bubblescript under the `user.*` variable namespace.
    */
   putUserInfo(info: UserInfo) {
-    return this.whenConnected<UserInfo>(
-      async () => {
-        this.userInfo = await this.conversations.putUserInfo(info)
-        return this.userInfo
-      }
-    )
+    return this.whenConnected<UserInfo>(async () => {
+      this.userInfo = await this.conversations.putUserInfo(info)
+      return this.userInfo
+    })
   }
 
   /**
@@ -373,13 +376,26 @@ export class ChatBubble {
   }
 
   /**
-* Retrieve list of conversations for the current user
-*/
+   * Retrieve list of conversations for the current user
+   */
   listConversations() {
-    return this.whenConnected<API.Conversation[]>(
-      async () =>
-        this.conversations.listConversations()
+    return this.whenConnected<API.Conversation[]>(async () =>
+      this.conversations.listConversations()
     )
+  }
+
+  /**
+   * Close the named conversation
+   */
+  closeConversation(g: string) {
+    return this.whenConnected<void>(async () => this.conversations.closeConversation(g))
+  }
+
+  /**
+   * Return the socket
+   */
+  getSocket() {
+    return this.socket
   }
 
   ///

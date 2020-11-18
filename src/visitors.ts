@@ -13,10 +13,19 @@ export namespace Visitors {
     public onNudge: OnNudge
     public onEvent: OnEvent
 
-    constructor(socket: Socket, config: Config, conversationInfo: API.ConversationsJoinResponse, onNudge: OnNudge, onEvent: OnEvent) {
+    constructor(
+      socket: Socket,
+      config: Config,
+      conversationInfo: API.ConversationsJoinResponse,
+      onNudge: OnNudge,
+      onEvent: OnEvent
+    ) {
       this.onNudge = onNudge
       this.onEvent = onEvent
-      this.channel = socket.channel(`visitor:${config.botId}`, this.joinParams(config, conversationInfo))
+      this.channel = socket.channel(
+        `visitor:${config.botId}`,
+        this.joinParams(config, conversationInfo)
+      )
       this.channel.on('nudge', this.onReceiveNudge)
       this.channel.on('event', this.onReceiveEvent)
     }
@@ -26,57 +35,57 @@ export namespace Visitors {
     }
 
     async sendPageView(url: string, title: string) {
-      return promisify<{}>(
-        () => this.channel.push('page_view', { url, title })
-      )
+      return promisify<{}>(() => this.channel.push('page_view', { url, title }))
     }
 
     async sendPageScroll(percentage: number) {
-      return promisify<{}>(
-        () => this.channel.push('scroll', { percentage })
-      )
+      return promisify<{}>(() => this.channel.push('scroll', { percentage }))
     }
 
     async sendChatOpenState(open: boolean) {
-      return promisify<{}>(
-        () => this.channel.push('chat_open', { open })
-      )
+      return promisify<{}>(() => this.channel.push('chat_open', { open }))
     }
 
-    async nudgeResponse(nudge: Nudge, action: API.NudgeResponse, response?: ExtendedNudgeResponse): Promise<void> {
+    async nudgeResponse(
+      nudge: Nudge,
+      action: API.NudgeResponse,
+      response?: ExtendedNudgeResponse
+    ): Promise<void> {
       const payload = { action, nudge_id: nudge.id, ...response }
-      return promisify<void>(
-        () => this.channel.push('nudge_response', payload)
-      )
+      return promisify<void>(() => this.channel.push('nudge_response', payload))
     }
 
     ///
 
-    private joinParams(config: Config, conversationInfo: API.ConversationsJoinResponse): API.VisitorsJoinParams {
+    private joinParams(
+      config: Config,
+      conversationInfo: API.ConversationsJoinResponse
+    ): API.VisitorsJoinParams {
       return {
         visitor_id: conversationInfo.userId,
         user_agent: config.userAgent + ` (${packageJson.name}; ${packageJson.version})`,
         locale: config.locale,
-        timezone: config.timezone,
+        timezone: config.timezone
       }
     }
 
     private async joinChannel(): Promise<API.VisitorsJoinResponse> {
-      return promisify<API.VisitorsJoinResponse>(
-        () => this.channel.join()
-      )
+      return promisify<API.VisitorsJoinResponse>(() => this.channel.join())
     }
 
     private onReceiveNudge = ({ id, json }: API.VisitorsNudge) => {
       const nudge: Nudge = {
-        id, ...JSON.parse(json)
+        id,
+        ...JSON.parse(json)
       }
       this.onNudge.dispatch(nudge)
     }
 
     private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {
       const event: Event = {
-        name, sender, payload: JSON.parse(json)
+        name,
+        sender,
+        payload: JSON.parse(json)
       }
       this.onEvent.dispatch(event)
     }

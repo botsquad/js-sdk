@@ -2,12 +2,7 @@ import { Socket, Channel, Presence } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 import { promisify } from './channel'
 
-import {
-  Config,
-  UserInfo,
-  Event,
-  API
-} from './types'
+import { Config, UserInfo, Event, API } from './types'
 
 export namespace Conversations {
   type OnEvent = SimpleEventDispatcher<Event>
@@ -45,14 +40,12 @@ export namespace Conversations {
         userId: response.user_id,
         userToken: response.delegate_token,
         userInfo: response.user,
-        badgeCount: this.currentBadgeCount,
+        badgeCount: this.currentBadgeCount
       }
     }
 
     putUserInfo(info: UserInfo) {
-      return promisify<UserInfo>(
-        () => this.channel.push('put_user_info', { info })
-      )
+      return promisify<UserInfo>(() => this.channel.push('put_user_info', { info }))
     }
 
     getCurrentBadgeCount() {
@@ -60,23 +53,28 @@ export namespace Conversations {
     }
 
     async listConversations() {
-      const { conversations } = await promisify<API.ConversationsListResponse>(
-        () => this.channel.push('list_conversations', {})
+      const { conversations } = await promisify<API.ConversationsListResponse>(() =>
+        this.channel.push('list_conversations', {})
       )
       return conversations
+    }
+
+    async closeConversation(g: string) {
+      return promisify<void>(() => this.channel.push('bury_conversation', { g }))
     }
 
     ///
 
     private async getBadgeCount() {
-      const  conversations  = await this.listConversations()
-      return conversations.reduce((count, conversation) => conversation.unread_message_count + count, 0)
+      const conversations = await this.listConversations()
+      return conversations.reduce(
+        (count, conversation) => conversation.unread_message_count + count,
+        0
+      )
     }
 
     private async joinChannel() {
-      return promisify<API.ConversationsChannelJoinResponse>(
-        () => this.channel.join()
-      )
+      return promisify<API.ConversationsChannelJoinResponse>(() => this.channel.join())
     }
 
     private syncPresence = async () => {
@@ -89,7 +87,9 @@ export namespace Conversations {
 
     private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {
       const event: Event = {
-        name, sender, payload: JSON.parse(json)
+        name,
+        sender,
+        payload: JSON.parse(json)
       }
       this.onEvent.dispatch(event)
     }

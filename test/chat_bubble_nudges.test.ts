@@ -5,7 +5,6 @@ import 'whatwg-fetch' // polyfill for jest
 import { VALID_JOIN_PARAMS } from './chat_bubble.test'
 
 describe('ChatBubble nudges', () => {
-
   // nudges are slow sometimes
 
   it('can receive and engage with nudges', async () => {
@@ -42,7 +41,7 @@ describe('ChatBubble nudges', () => {
     expect(nudge.text_input).toEqual({ enabled: true, placeholder: 'Type something' })
 
     await bubble.nudgeShown(nudge)
-    await bubble.nudgeEngage(nudge, { text_input: "Helloooo" })
+    await bubble.nudgeEngage(nudge, { text_input: 'Helloooo' })
   })
 
   it('receives a nudge on page scroll', async () => {
@@ -61,5 +60,4 @@ describe('ChatBubble nudges', () => {
 
     await bubble.sendChatOpenState(true)
   })
-
 })
