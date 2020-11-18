@@ -167,7 +167,7 @@ export namespace API {
       disableChat?: boolean
       whatsappNumber?: string
       phoneNumber?: string
-      email?: string
+      contactForm?: boolean
     }
   }
 
