@@ -1,11 +1,6 @@
-import {
-  Config,
-  PushService,
-  API
-} from './types'
+import { Config, PushService, API, UserInfo } from './types'
 
 export namespace REST {
-
   /**
    * HTTP client for interacting with the Botsquad REST API
    */
@@ -17,20 +12,44 @@ export namespace REST {
     }
 
     public async getBotConfig(botId: string) {
-      return this.request<void, API.BotResponse>("GET", botId)
+      return this.request<void, API.BotResponse>('GET', botId)
+    }
+
+    public async getUserInfo(botId: string, userId: string) {
+      return this.request<void, UserInfo>('GET', botId, `user/${userId}`)
+    }
+
+    public async leaveMessage(botId: string, request: API.LeaveMessageRequest) {
+      return this.request<API.LeaveMessageRequest, API.OkResponse>(
+        'POST',
+        botId,
+        'leave-message',
+        request
+      )
     }
 
     public async pushSubscribe(botId: string, userToken: string, type: PushService, data: any) {
       const request = {
-        type, data,
-        delegate_token: userToken,
+        type,
+        data,
+        delegate_token: userToken
       }
-      return this.request<API.PushRegisterRequest, API.PushRegisterResponse>("POST", botId, "push_subscribe", request)
+      return this.request<API.PushRegisterRequest, API.OkResponse>(
+        'POST',
+        botId,
+        'push_subscribe',
+        request
+      )
     }
 
     ///
 
-    private async request<RQ, RS>(method: "GET" | "POST", botId: string, path?: string, request?: RQ) {
+    private async request<RQ, RS>(
+      method: 'GET' | 'POST',
+      botId: string,
+      path?: string,
+      request?: RQ
+    ) {
       const body = request ? JSON.stringify(request) : undefined
       const endpoint = this.endpointUrl(botId, path)
       const params = { method, headers: { 'content-type': 'application/json' }, body }

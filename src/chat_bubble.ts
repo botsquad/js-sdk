@@ -116,10 +116,11 @@ export class ChatBubble {
   private onEventDispatcher = new SimpleEventDispatcher<Event>()
 
   public botResponse?: API.BotResponse
+  public restClient: R.Client
+
   private userId?: string
   private userToken?: string
   private userInfo: UserInfo | null = null
-  private restClient: R.Client
   private postConnect: (() => void)[] = []
 
   /**
@@ -337,7 +338,7 @@ export class ChatBubble {
    * Valid push types are `web-push`, `firebase`, `pushwoosh` and `expo`.
    */
   registerPushToken(type: PushService, data: any) {
-    return this.whenConnected<API.PushRegisterResponse>(
+    return this.whenConnected<API.OkResponse>(
       () => this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
     )
   }

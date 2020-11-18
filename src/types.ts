@@ -87,6 +87,10 @@ export interface UserInfo extends Record<string, any> {
    * [[ChatBubble]]; the bot might have decided to switch locale.
    */
   locale?: string
+  /**
+   * Any additional data
+   */
+  user_data?: Record<string, any>
 }
 
 /** Information about a "nudge"; a small piece of information that is shown to get the user to engage with the chatbot. */
@@ -308,7 +312,15 @@ export namespace API {
     delegate_token: string
   }
 
-  export interface PushRegisterResponse {
+  export interface OkResponse {
     result: 'OK'
+  }
+
+  export interface LeaveMessageRequest {
+    user_id: string
+    name: string
+    phone?: string
+    email: string
+    message: string
   }
 }
