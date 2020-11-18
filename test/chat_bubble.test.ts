@@ -236,7 +236,7 @@ describe('ChatBubble badge count', () => {
     const info = await bubble.connect()
     expect(typeof info.badgeCount).toBe('number')
 
-    const conversations = await bubble.listConversations()
+    const conversations = bubble.getConversations()
     expect(conversations).toEqual([])
 
     return new Promise(resolve => {

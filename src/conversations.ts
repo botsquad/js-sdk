@@ -13,6 +13,7 @@ export namespace Conversations {
     private currentBadgeCount = 0
     public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
     public onEvent: OnEvent
+    private conversations: API.Conversation[] = []
 
     constructor(socket: Socket, config: Config, onEvent: OnEvent) {
       let { botId, userToken, userId } = config
@@ -34,7 +35,8 @@ export namespace Conversations {
       const response = await this.joinChannel()
       this.presence = new Presence(this.channel)
       this.presence.onSync(this.syncPresence)
-      this.currentBadgeCount = await this.getBadgeCount()
+      this.currentBadgeCount = 0
+      await this.syncPresence()
 
       return {
         userId: response.user_id,
@@ -52,11 +54,8 @@ export namespace Conversations {
       return this.currentBadgeCount
     }
 
-    async listConversations() {
-      const { conversations } = await promisify<API.ConversationsListResponse>(() =>
-        this.channel.push('list_conversations', {})
-      )
-      return conversations
+    getConversations() {
+      return this.conversations
     }
 
     async closeConversation(g: string) {
@@ -65,20 +64,21 @@ export namespace Conversations {
 
     ///
 
-    private async getBadgeCount() {
-      const conversations = await this.listConversations()
-      return conversations.reduce(
-        (count, conversation) => conversation.unread_message_count + count,
-        0
-      )
-    }
-
     private async joinChannel() {
       return promisify<API.ConversationsChannelJoinResponse>(() => this.channel.join())
     }
 
     private syncPresence = async () => {
-      const badgeCount = await this.getBadgeCount()
+      const { conversations } = await promisify<API.ConversationsListResponse>(() =>
+        this.channel.push('list_conversations', {})
+      )
+      this.conversations = conversations
+
+      const badgeCount = this.conversations.reduce(
+        (count, conversation) => conversation.unread_message_count + count,
+        0
+      )
+
       if (badgeCount !== this.currentBadgeCount) {
         this.currentBadgeCount = badgeCount
         this.onBadgeCountUpdate.dispatch(badgeCount)

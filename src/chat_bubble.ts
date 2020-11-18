@@ -376,12 +376,10 @@ export class ChatBubble {
   }
 
   /**
-   * Retrieve list of conversations for the current user
+   * The list of conversations for the current user
    */
-  listConversations() {
-    return this.whenConnected<API.Conversation[]>(async () =>
-      this.conversations.listConversations()
-    )
+  getConversations() {
+    return this.conversations.getConversations()
   }
 
   /**
