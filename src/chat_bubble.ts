@@ -159,7 +159,7 @@ export class ChatBubble {
    */
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
-    const botResult = this.restClient.getBotConfig(this.config.botId)
+    const botResult = this.restClient.getBotConfig(this.config.botId, this.config.isPreview)
     const [bot] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
 
     this.botResponse = bot

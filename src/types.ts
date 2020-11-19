@@ -33,6 +33,9 @@ export interface Config {
 
   /** Whether the connecting endpoint uses HTTPS or not. Defaults to `true`. Leave unchanged in most cases. */
   secure?: boolean
+
+  /** Use the non-published version for the bot metadata */
+  isPreview?: boolean
 }
 
 export interface ConnectResult {

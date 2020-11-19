@@ -11,8 +11,9 @@ export namespace REST {
       this.endpoint = `http${config.secure ? 's' : ''}://${config.hostname}/api`
     }
 
-    public async getBotConfig(botId: string) {
-      return this.request<void, API.BotResponse>('GET', botId)
+    public async getBotConfig(botId: string, isPreview?: boolean) {
+      const path = isPreview ? '?preview=true' : undefined
+      return this.request<void, API.BotResponse>('GET', botId, path)
     }
 
     public async getUserInfo(botId: string, userId: string) {
