@@ -81,7 +81,6 @@ describe('ChatBubble connection', () => {
 
     const info = await bubble.connect()
 
-    expect(typeof info.badgeCount).toBe('number')
     expect(typeof info.userToken).toBe('string')
     expect(info.userInfo).toEqual(null)
 
@@ -132,7 +131,7 @@ describe('ChatBubble connection', () => {
   it('can use userId to connect', async () => {
     const bubble = new ChatBubble({ userId: 'user001', ...VALID_JOIN_PARAMS })
 
-    const { userId, userToken } = await bubble.connect()
+    const { userId } = await bubble.connect()
 
     await bubble.disconnect()
 
@@ -233,16 +232,14 @@ describe('ChatBubble badge count', () => {
   it('badge count callback invoked after subscription', async () => {
     const bubble = new ChatBubble(VALID_JOIN_PARAMS)
 
-    const info = await bubble.connect()
-    expect(typeof info.badgeCount).toBe('number')
-
-    const conversations = bubble.getConversations()
-    expect(conversations).toEqual([])
+    await bubble.connect()
 
     return new Promise(resolve => {
-      bubble.onBadgeCountUpdate.subscribe(count => {
-        expect(typeof count).toBe('number')
-        expect(count).toEqual(0)
+      bubble.onConversationsUpdate.subscribe(info => {
+        expect(typeof info.badgeCount).toBe('number')
+        expect(info.badgeCount).toEqual(0)
+        expect(info.badgeConversation).toEqual(null)
+        expect(info.conversations).toEqual([])
 
         resolve()
       })

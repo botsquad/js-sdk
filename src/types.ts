@@ -48,9 +48,6 @@ export interface ConnectResult {
    */
   userId: string
 
-  /** The current badge count that should be displayed on the chat bubble. */
-  badgeCount: number
-
   /** The currently known information about the user. Will be `undefined` when the user is not yet known in the system. */
   userInfo: UserInfo | null
 
@@ -116,6 +113,12 @@ export interface Nudge {
 
 export interface ExtendedNudgeResponse {
   text_input?: string
+}
+
+export interface ConversationsUpdatePayload {
+  badgeCount: number
+  badgeConversation: null | string
+  conversations: API.Conversation[]
 }
 
 /** An event that is being received by the chat bubble. */
@@ -238,7 +241,6 @@ export namespace API {
   export interface ConversationsJoinResponse {
     userToken: string
     userId: string
-    badgeCount: number
     userInfo: UserInfo | null
   }
 

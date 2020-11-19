@@ -166,7 +166,7 @@ export class ChatBubble {
 
     // join conversations channel, for badge count, context and delegate token
     const joinResponse = await this.conversations.join()
-    const { userToken, userId, badgeCount, userInfo } = joinResponse
+    const { userToken, userId, userInfo } = joinResponse
     this.userId = userId
     this.userToken = userToken
     this.userInfo = userInfo
@@ -199,7 +199,6 @@ export class ChatBubble {
     return {
       userToken,
       userId,
-      badgeCount,
       userInfo: this.userInfo,
       bot: {
         id: bot.id,
@@ -256,21 +255,18 @@ export class ChatBubble {
   }
 
   /**
-   * Subscribe to updates to the badge counter in the chat bubble.
+   * Subscribe to changes in any of the conversations in the chat bubble.
    *
    * Usage:
    * ```
-   * bubble.onBadgeCountUpdate.subscribe(count => console.log(`Count updated: ${count}`))
+   * bubble.onConversationsUpdate.subscribe(info => console.log(`Badge count updated: ${info.badgeCount}`))
    * ```
    *
-   * When you subscribe to the badge count update, the callback is invoked right away with the
+   * When you subscribe to the conversations update, the callback is invoked right away with the
    * current badge count value.
    */
-  get onBadgeCountUpdate() {
-    setImmediate(() => {
-      this.conversations.onBadgeCountUpdate.dispatch(this.conversations.getCurrentBadgeCount())
-    })
-    return this.conversations.onBadgeCountUpdate.asEvent()
+  get onConversationsUpdate() {
+    return this.conversations.getOnConversationsUpdate()
   }
 
   /**
@@ -373,13 +369,6 @@ export class ChatBubble {
    */
   getUserId() {
     return this.userId
-  }
-
-  /**
-   * The list of conversations for the current user
-   */
-  getConversations() {
-    return this.conversations.getConversations()
   }
 
   /**

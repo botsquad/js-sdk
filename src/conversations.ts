@@ -2,7 +2,7 @@ import { Socket, Channel, Presence } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 import { promisify } from './channel'
 
-import { Config, UserInfo, Event, API } from './types'
+import { Config, UserInfo, Event, API, ConversationsUpdatePayload } from './types'
 
 export namespace Conversations {
   type OnEvent = SimpleEventDispatcher<Event>
@@ -10,10 +10,9 @@ export namespace Conversations {
   export class Manager {
     private channel: Channel
     private presence?: Presence
-    private currentBadgeCount = 0
-    public onBadgeCountUpdate = new SimpleEventDispatcher<number>()
+    private onConversationsUpdate = new SimpleEventDispatcher<ConversationsUpdatePayload>()
     public onEvent: OnEvent
-    private conversations: API.Conversation[] = []
+    private lastConversationsPayload?: ConversationsUpdatePayload
 
     constructor(socket: Socket, config: Config, onEvent: OnEvent) {
       let { botId, userToken, userId } = config
@@ -35,14 +34,12 @@ export namespace Conversations {
       const response = await this.joinChannel()
       this.presence = new Presence(this.channel)
       this.presence.onSync(this.syncPresence)
-      this.currentBadgeCount = 0
       await this.syncPresence()
 
       return {
         userId: response.user_id,
         userToken: response.delegate_token,
-        userInfo: response.user,
-        badgeCount: this.currentBadgeCount
+        userInfo: response.user
       }
     }
 
@@ -50,12 +47,13 @@ export namespace Conversations {
       return promisify<UserInfo>(() => this.channel.push('put_user_info', { info }))
     }
 
-    getCurrentBadgeCount() {
-      return this.currentBadgeCount
-    }
-
-    getConversations() {
-      return this.conversations
+    getOnConversationsUpdate() {
+      setImmediate(() => {
+        if (this.lastConversationsPayload) {
+          this.onConversationsUpdate.dispatch(this.lastConversationsPayload)
+        }
+      })
+      return this.onConversationsUpdate.asEvent()
     }
 
     async closeConversation(g: string) {
@@ -72,17 +70,25 @@ export namespace Conversations {
       const { conversations } = await promisify<API.ConversationsListResponse>(() =>
         this.channel.push('list_conversations', {})
       )
-      this.conversations = conversations
 
-      const badgeCount = this.conversations.reduce(
+      const badgeCount = conversations.reduce(
         (count, conversation) => conversation.unread_message_count + count,
         0
       )
 
-      if (badgeCount !== this.currentBadgeCount) {
-        this.currentBadgeCount = badgeCount
-        this.onBadgeCountUpdate.dispatch(badgeCount)
+      const badgeConversation = conversations.reduce(
+        (g, conv) => g || (conv.unread_message_count > 0 ? conv.g : null),
+        null as null | string
+      )
+
+      const payload = {
+        conversations,
+        badgeConversation,
+        badgeCount
       }
+
+      this.onConversationsUpdate.dispatch(payload)
+      this.lastConversationsPayload = payload
     }
 
     private onReceiveEvent = ({ name, sender, json }: API.ChannelEvent) => {
