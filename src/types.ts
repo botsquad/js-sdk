@@ -36,6 +36,9 @@ export interface Config {
 
   /** Use the non-published version for the bot metadata */
   isPreview?: boolean
+
+  /** The frontend parameter to pass to the websocket URL */
+  frontend?: string
 }
 
 export interface ConnectResult {

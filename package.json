@@ -6,9 +6,7 @@
   "main": "dist/sdk.umd.js",
   "module": "dist/sdk.es5.js",
   "typings": "dist/types/src/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "author": "Arjan Scherpenisse <arjan@botsquad.com>",
   "repository": {
     "type": "git",
@@ -44,35 +42,24 @@
     },
     "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/test/"
-    ],
+    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "coveragePathIgnorePatterns": ["/node_modules/", "/test/"],
     "coverageThreshold": {
       "global": {
         "branches": 70,
-        "functions": 90,
+        "functions": 80,
         "lines": 90,
         "statements": 90
       }
     },
-    "collectCoverageFrom": [
-      "src/*.{js,ts}"
-    ]
+    "collectCoverageFrom": ["src/*.{js,ts}"]
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
   },
   "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
+    "extends": ["@commitlint/config-conventional"]
   },
   "devDependencies": {
     "@commitlint/cli": "^7.1.2",
