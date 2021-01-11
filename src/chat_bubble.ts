@@ -1,4 +1,4 @@
-import { LongPoll, Socket } from 'phoenix'
+import { Socket } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 
 import {
@@ -405,8 +405,6 @@ export class ChatBubble {
   }
 }
 
-let connectionEstablishedOnce = false
-
 function buildSocket(config: Config): Socket {
   const opts = {
     params: { frontend: config.frontend || 'web_widget' },
@@ -415,32 +413,7 @@ function buildSocket(config: Config): Socket {
   }
 
   const socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`, opts)
-
-  socket.onOpen(() => {
-    connectionEstablishedOnce = true
-  })
-
-  socket.onClose(() => {})
-
-  socket.onError(() => {
-    ;(socket as any).channels.forEach((ch: any) => {
-      const params = ch.params()
-      ch.params = () => ({ ...params, reconnect: true })
-      ch.joinPush.payload = ch.params
-    })
-
-    if (!connectionEstablishedOnce) {
-      // close the socket with an error code
-      socket.disconnect(undefined, 3000)
-
-      // fall back to long poll
-      ;(socket as any).transport = LongPoll
-
-      // reopen
-      socket.connect()
-    }
-  })
-
   socket.connect()
+
   return socket
 }
