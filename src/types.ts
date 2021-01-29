@@ -142,7 +142,7 @@ export enum PushService {
   WEB_PUSH = 'web-push',
   FIREBASE = 'firebase',
   PUSHWOOSH = 'pushwoosh',
-  EXPO = 'expo'
+  EXPO = 'expo',
 }
 
 // Botsquad websocket / REST API responses
@@ -262,6 +262,7 @@ export namespace API {
 
   export interface Conversation {
     g: string
+    locale: string
     inserted_at: string
     conversation_data: Record<string, any>
     last_message: string
@@ -311,7 +312,7 @@ export namespace API {
   export enum NudgeResponse {
     SHOW = 'show',
     ENGAGE = 'engage',
-    DISCARD = 'discard'
+    DISCARD = 'discard',
   }
 
   export interface PushRegisterRequest {
