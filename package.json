@@ -1,6 +1,6 @@
 {
   "name": "@botsquad/sdk",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "",
   "keywords": [],
   "main": "dist/sdk.umd.js",
