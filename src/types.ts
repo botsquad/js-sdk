@@ -278,7 +278,7 @@ export namespace API {
     first_name?: string
     last_name?: string
     profile_picture?: string
-    status: 'online' | 'away' | 'offline'
+    status: 'online' | 'away' | 'offline' | 'bot'
   }
 
   export interface VisitorsJoinResponse {
