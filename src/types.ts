@@ -100,6 +100,8 @@ export interface UserInfo extends Record<string, any> {
 export interface Nudge {
   /** Identifier */
   id: string
+  /** Title as defined in CMS */
+  title: string
   /** The nudge message */
   message: string
   /** A caption which can be displayed on top of the nudge widget */
@@ -300,6 +302,7 @@ export namespace API {
 
   export interface VisitorsNudge {
     id: string
+    title: string
     json: string
   }
 

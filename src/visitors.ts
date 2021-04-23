@@ -73,9 +73,10 @@ export namespace Visitors {
       return promisify<API.VisitorsJoinResponse>(() => this.channel.join())
     }
 
-    private onReceiveNudge = ({ id, json }: API.VisitorsNudge) => {
+    private onReceiveNudge = ({ id, title, json }: API.VisitorsNudge) => {
       const nudge: Nudge = {
         id,
+        title,
         ...JSON.parse(json)
       }
       this.onNudge.dispatch(nudge)
