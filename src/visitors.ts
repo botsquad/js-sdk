@@ -61,12 +61,16 @@ export namespace Visitors {
       config: Config,
       conversationInfo: API.ConversationsJoinResponse
     ): API.VisitorsJoinParams {
-      return {
+      const params: API.VisitorsJoinParams = {
         visitor_id: conversationInfo.userId,
         user_agent: config.userAgent + ` (${packageJson.name}; ${packageJson.version})`,
         locale: config.locale,
         timezone: config.timezone
       }
+      if (config.userInfo) {
+        params.user_info = config.userInfo
+      }
+      return params
     }
 
     private async joinChannel(): Promise<API.VisitorsJoinResponse> {

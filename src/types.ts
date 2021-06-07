@@ -39,7 +39,21 @@ export interface Config {
 
   /** The frontend parameter to pass to the websocket URL */
   frontend?: string
+
+  /** An arbitrary context to pass in; will be used to pre-fill the bot CRM */
+  userInfo?: UserInfoConfig
 }
+
+type UserInfoConfig = {
+  /** The users's first name */
+  first_name?: string
+  /** The users's last name */
+  last_name?: string
+  /** URL of the profile picture */
+  profile_picture?: string
+  /** The users's timezone */
+  timezone?: string
+} & Record<string, any>
 
 export interface ConnectResult {
   /**
@@ -293,6 +307,7 @@ export namespace API {
     user_agent?: string
     timezone?: string
     locale?: string
+    user_info?: UserInfoConfig
   }
 
   export interface PageView {
