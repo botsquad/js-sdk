@@ -1,6 +1,5 @@
-import * as marked from 'marked'
+import marked from 'marked'
 import * as URL from 'url-parse'
-import { Renderer } from 'marked'
 import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
@@ -40,7 +39,7 @@ export function processTemplate(template: Template, parameters: Record<string, s
 
 export function processText(value: string): HtmlObject {
   if (!markdownOpts) {
-    const renderer = new Renderer()
+    const renderer = new marked.Renderer()
     const linkRenderer = renderer.link
 
     renderer.link = (href: string, title: string, text: string) => {
