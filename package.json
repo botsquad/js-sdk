@@ -6,7 +6,9 @@
   "main": "dist/sdk.umd.js",
   "module": "dist/sdk.es5.js",
   "typings": "dist/types/src/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "author": "Arjan Scherpenisse <arjan@botsquad.com>",
   "repository": {
     "type": "git",
@@ -42,8 +44,15 @@
     },
     "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": ["ts", "tsx", "js"],
-    "coveragePathIgnorePatterns": ["/node_modules/", "/test/"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 70,
@@ -52,21 +61,30 @@
         "statements": 90
       }
     },
-    "collectCoverageFrom": ["src/*.{js,ts}"]
+    "collectCoverageFrom": [
+      "src/*.{js,ts}"
+    ]
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "devDependencies": {
     "@commitlint/cli": "^7.1.2",
     "@commitlint/config-conventional": "^7.1.2",
+    "@types/chai": "^4.2.21",
     "@types/jest": "^23.3.2",
+    "@types/jsdom": "^16.2.13",
+    "@types/marked": "^3.0.0",
     "@types/node": "^10.11.0",
     "@types/phoenix": "^1.5.1",
+    "@types/url-parse": "^1.4.4",
+    "chai": "^4.3.4",
     "colors": "^1.3.2",
     "commitizen": "^3.0.0",
     "coveralls": "^3.0.2",
@@ -75,6 +93,7 @@
     "husky": "^1.0.1",
     "jest": "^23.6.0",
     "jest-config": "^23.6.0",
+    "jsdom": "^17.0.0",
     "lint-staged": "^8.0.0",
     "lodash.camelcase": "^4.3.0",
     "prettier": "^1.19.1",
@@ -99,8 +118,11 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "marked": "^3.0.3",
     "phoenix": "^1.5.7",
+    "speechmarkdown-js": "^1.9.0",
     "ste-simple-events": "^1.6.3",
+    "url-parse": "^1.5.3",
     "whatwg-fetch": "^3.0.0"
   }
 }
