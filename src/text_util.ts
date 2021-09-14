@@ -1,5 +1,5 @@
 import marked from 'marked'
-import * as URL from 'url-parse'
+import URL from 'url-parse'
 import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
