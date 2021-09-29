@@ -57,7 +57,7 @@ export namespace Conversations {
     }
 
     async closeConversation(g: string) {
-      return promisify<void>(() => this.channel.push('bury_conversation', { g })).then(() =>
+      return promisify<void>(() => this.channel.push('close_conversation', { g })).then(() =>
         this.syncPresence()
       )
     }
