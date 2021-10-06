@@ -252,6 +252,7 @@ export namespace API {
     id: string
     title: string
     purpose: string
+    privacy_url: string
     profile_picture: string
     locale: string
     extra_locales: string[]
