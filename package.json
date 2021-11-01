@@ -119,7 +119,7 @@
   },
   "dependencies": {
     "marked": "^3.0.3",
-    "phoenix": "^1.5.7",
+    "phoenix": "^1.6.2",
     "speechmarkdown-js": "^1.9.0",
     "ste-simple-events": "^1.6.3",
     "url-parse": "^1.5.3",
