@@ -406,13 +406,21 @@ export class ChatBubble {
 }
 
 function buildSocket(config: Config): Socket {
+  const reconnectAfterMs = (tries: number) => [100, 500, 500, 500, 500, 750, 750][tries - 1] || 1000
+
   const opts = {
     params: { frontend: config.frontend || 'web_widget' },
     heartbeatIntervalMs: 5000,
-    reconnectAfterMs: () => 1000
+    reconnectAfterMs
   }
 
   const socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`, opts)
+
+  const sock: any = socket
+  sock.onClose(() => {
+    sock.params = { ...sock.params, reconnect: true }
+  })
+
   socket.connect()
 
   return socket
