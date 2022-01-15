@@ -118,7 +118,7 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "marked": "^3.0.3",
+    "marked": "^4.0.10",
     "phoenix": "^1.5.7",
     "speechmarkdown-js": "^1.9.0",
     "ste-simple-events": "^1.6.3",
