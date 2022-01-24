@@ -33,4 +33,13 @@ describe('processText', function() {
     s = TextUtil.processText('[klik hier](/x.html)').__html
     assert.equal('<p><a target="_top" href="/x.html">klik hier</a></p>\n', s)
   })
+
+  it('renders tooltips', function(done) {
+    assert.equal(
+      '<p>Hello <a class="tooltip" title="Hi there">world</a></p>\n',
+      TextUtil.processText('Hello [world](## "Hi there")').__html
+    )
+
+    done()
+  })
 })

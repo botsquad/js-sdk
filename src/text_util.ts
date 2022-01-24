@@ -1,20 +1,18 @@
-import marked from 'marked'
-import URL from 'url-parse'
+import { marked } from 'marked'
+import * as URL from 'url-parse'
 import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
+  '>': '&gt;'
 }
 
 export function escapeHtml(value: string): string {
-  return String(value).replace(/[&<>"']/g, s => HTML_ENTITIES[s] || '')
+  return String(value).replace(/[&<>]/g, s => HTML_ENTITIES[s] || '')
 }
 
-let markdownOpts: marked.MarkedOptions | null = null
+let markdownOpts: any = null
 
 type HtmlObject = { __html: string }
 type Template = string | HtmlObject
@@ -44,6 +42,10 @@ export function processText(value: string): HtmlObject {
 
     renderer.link = (href: string, title: string, text: string) => {
       const html = linkRenderer.call(renderer as any, href, title, text)
+      if (href === '##') {
+        return html.replace('href="##"', 'class="tooltip"')
+      }
+
       const url = new URL(href, document.location.href)
       if (url.host === document.location.host) {
         return html.replace(/^<a /, '<a target="_top" ')
