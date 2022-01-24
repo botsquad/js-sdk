@@ -1,5 +1,4 @@
 import { marked } from 'marked'
-import * as URL from 'url-parse'
 import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
@@ -46,8 +45,10 @@ export function processText(value: string): HtmlObject {
         return html.replace('href="##"', 'class="tooltip"')
       }
 
-      const url = new URL(href, document.location.href)
-      if (url.host === document.location.host) {
+      const parsed = document.createElement('a')
+      parsed.href = href
+
+      if (parsed.host === document.location.host) {
         return html.replace(/^<a /, '<a target="_top" ')
       }
       return html.replace(/^<a /, '<a target="_blank" rel="nofollow" ')

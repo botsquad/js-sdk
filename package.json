@@ -114,7 +114,6 @@
     "phoenix": "^1.6.2",
     "speechmarkdown-js": "^1.9.0",
     "ste-simple-events": "^1.6.3",
-    "url-parse": "^1.5.4",
     "whatwg-fetch": "^3.0.0"
   }
 }
