@@ -1,5 +1,5 @@
 import { marked } from 'marked'
-import { SpeechMarkdown } from './speechmarkdown-js-vendored'
+import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
   '&': '&amp;',

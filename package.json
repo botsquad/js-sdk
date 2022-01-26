@@ -29,6 +29,7 @@
     "deploy-docs": "ts-node tools/gh-pages-publish",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "commit": "git-cz",
+    "postinstall": "patch-package",
     "semantic-release": "semantic-release",
     "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
     "travis-deploy-once": "travis-deploy-once"
@@ -88,6 +89,7 @@
     "jsdom": "^17.0.0",
     "lint-staged": "^8.0.0",
     "lodash.camelcase": "^4.3.0",
+    "patch-package": "^6.4.7",
     "prettier": "^1.19.1",
     "prompt": "^1.0.0",
     "replace-in-file": "^3.4.2",
@@ -111,8 +113,8 @@
   },
   "dependencies": {
     "marked": "^4.0.10",
-    "myna-parser": "^2.5.1",
     "phoenix": "^1.6.2",
+    "speechmarkdown-js": "^2.0.0",
     "ste-simple-events": "^1.6.3",
     "whatwg-fetch": "^3.0.0"
   }

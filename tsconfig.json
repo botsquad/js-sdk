@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
+    "checkJs": false,
     "declarationDir": "dist/types",
     "outDir": "dist/lib",
     "resolveJsonModule": true,
