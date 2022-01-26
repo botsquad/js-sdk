@@ -42,4 +42,11 @@ describe('processText', function() {
 
     done()
   })
+
+  it('renders dates', function(done) {
+    assert.equal('<p>Mother-in-law</p>\n', TextUtil.processText('Mother-in-law').__html)
+    assert.equal('<p>10-10-2020</p>\n', TextUtil.processText('10-10-2020').__html)
+
+    done()
+  })
 })
