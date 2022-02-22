@@ -286,7 +286,7 @@ export namespace API {
     last_message_date: string
     read_until: string
     unread_message_count: number
-    operator?: Operator
+    operator_present: boolean
   }
 
   export interface Operator {
