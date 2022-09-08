@@ -49,4 +49,11 @@ describe('processText', function() {
 
     done()
   })
+
+  it('renders the appropriate amount of newlines', function(done) {
+    assert.equal('<p>a</p>\n', TextUtil.processText('a').__html)
+    assert.equal('<p>a<br>b</p>\n', TextUtil.processText('a\nb').__html)
+
+    done()
+  })
 })
