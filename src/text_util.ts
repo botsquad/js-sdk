@@ -62,6 +62,8 @@ const SMD = new SpeechMarkdown()
 
 export function stripSpeechmarkdown(value: string): string {
   try {
+    // until https://github.com/speechmarkdown/speechmarkdown-js/pull/79 is merged
+    value = value.replace(/!(?:\(([^)]*)\))?\["(.*)"\]/g, '$1')
     return SMD.toText(value)
   } catch (e) {
     console.error(e)
