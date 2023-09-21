@@ -421,20 +421,15 @@ export function buildSocket(config: Config): Socket {
     sock._connectionEstablishedOnce = true
   })
 
-  socket.onError(() => {
+  socket.onError((reason, transport, establishedConnections) => {
     sock.channels.forEach((ch: any) => {
       const params = ch.params()
       ch.params = () => ({ ...params, reconnect: true })
       ch.joinPush.payload = ch.params
     })
 
-    if (sock && !sock._connectionEstablishedOnce) {
-      // close the socket with an error code
-      socket.disconnect(() => null, 3000)
-
-      // fall back to long poll
-      ;(socket as any).transport = LongPoll
-      // reopen
+    if (transport !== LongPoll && establishedConnections === 0) {
+      socket.replaceTransport(LongPoll)
       socket.connect()
     }
   })
