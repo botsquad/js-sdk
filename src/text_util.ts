@@ -1,17 +1,17 @@
-import { marked } from 'marked'
+import { MarkedOptions, marked } from 'marked'
 import { SpeechMarkdown } from 'speechmarkdown-js'
 
 const HTML_ENTITIES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
-  '>': '&gt;'
+  '>': '&gt;',
 }
 
 export function escapeHtml(value: string): string {
-  return String(value).replace(/[&<>]/g, s => HTML_ENTITIES[s] || '')
+  return String(value).replace(/[&<>]/g, (s) => HTML_ENTITIES[s] || '')
 }
 
-let markdownOpts: any = null
+let markdownOpts: MarkedOptions | null = null
 
 type HtmlObject = { __html: string }
 type Template = string | HtmlObject
@@ -55,7 +55,9 @@ export function processText(value: string): HtmlObject {
     }
     markdownOpts = { renderer, breaks: true, gfm: true }
   }
-  return { __html: marked(escapeHtml(stripSpeechmarkdown(value)), markdownOpts) }
+  return {
+    __html: marked(escapeHtml(stripSpeechmarkdown(value)), markdownOpts),
+  }
 }
 
 const SMD = new SpeechMarkdown()

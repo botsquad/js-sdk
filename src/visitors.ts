@@ -2,7 +2,6 @@ import { Socket, Channel } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 import { Config, Nudge, Event, ExtendedNudgeResponse, API } from './types'
 import { promisify } from './channel'
-import * as packageJson from '../package.json'
 
 export namespace Visitors {
   type OnNudge = SimpleEventDispatcher<Nudge>
@@ -18,13 +17,13 @@ export namespace Visitors {
       config: Config,
       conversationInfo: API.ConversationsJoinResponse,
       onNudge: OnNudge,
-      onEvent: OnEvent
+      onEvent: OnEvent,
     ) {
       this.onNudge = onNudge
       this.onEvent = onEvent
       this.channel = socket.channel(
         `visitor:${config.botId}`,
-        this.joinParams(config, conversationInfo)
+        this.joinParams(config, conversationInfo),
       )
       this.channel.on('nudge', this.onReceiveNudge)
       this.channel.on('event', this.onReceiveEvent)
@@ -49,7 +48,7 @@ export namespace Visitors {
     async nudgeResponse(
       nudge: Nudge,
       action: API.NudgeResponse,
-      response?: ExtendedNudgeResponse
+      response?: ExtendedNudgeResponse,
     ): Promise<void> {
       const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(() => this.channel.push('nudge_response', payload))
@@ -59,13 +58,13 @@ export namespace Visitors {
 
     private joinParams(
       config: Config,
-      conversationInfo: API.ConversationsJoinResponse
+      conversationInfo: API.ConversationsJoinResponse,
     ): API.VisitorsJoinParams {
       const params: API.VisitorsJoinParams = {
         visitor_id: conversationInfo.userId,
-        user_agent: config.userAgent + ` (${packageJson.name}; ${packageJson.version})`,
+        user_agent: config.userAgent + ` (PACKAGE_NAME; PACKAGE_VERSION)`,
         locale: config.locale,
-        timezone: config.timezone
+        timezone: config.timezone,
       }
       if (config.userInfo) {
         params.user_info = config.userInfo
@@ -81,7 +80,7 @@ export namespace Visitors {
       const nudge: Nudge = {
         id,
         title,
-        ...JSON.parse(json)
+        ...JSON.parse(json),
       }
       this.onNudge.dispatch(nudge)
     }
@@ -90,7 +89,7 @@ export namespace Visitors {
       const event: Event = {
         name,
         sender,
-        payload: JSON.parse(json)
+        payload: JSON.parse(json),
       }
       this.onEvent.dispatch(event)
     }

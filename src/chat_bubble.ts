@@ -9,7 +9,7 @@ import {
   Event,
   PushService,
   UserInfo,
-  API
+  API,
 } from './types'
 import { REST as R } from './rest_client'
 import { Conversations as C } from './conversations'
@@ -160,7 +160,7 @@ export class ChatBubble {
   async connect(): Promise<ConnectResult> {
     // retrieve bot config, connect
     const botResult = this.restClient.getBotConfig(this.config.botId, this.config.isPreview)
-    const [bot] = await Promise.all<API.BotResponse, void>([botResult, this.connectSocket()])
+    const [bot] = await Promise.all([botResult, this.connectSocket()])
 
     this.botResponse = bot
 
@@ -178,7 +178,7 @@ export class ChatBubble {
         this.config,
         joinResponse,
         this.onNudgeDispatcher,
-        this.onEventDispatcher
+        this.onEventDispatcher,
       )
 
       try {
@@ -190,7 +190,7 @@ export class ChatBubble {
 
     // send any pending request
     try {
-      await Promise.all(this.postConnect.map(callback => callback()))
+      await Promise.all(this.postConnect.map((callback) => callback()))
     } catch (e) {
       // console.log('Error in postconnect callback', e);
     }
@@ -203,8 +203,8 @@ export class ChatBubble {
       bot: {
         id: bot.id,
         title: bot.title,
-        profilePicture: bot.profile_picture
-      }
+        profilePicture: bot.profile_picture,
+      },
     }
   }
 
@@ -212,7 +212,7 @@ export class ChatBubble {
    * Close the connection to the server, if it was opened.
    */
   async disconnect(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.socket.isConnected()) {
         resolve()
       } else {
@@ -241,7 +241,7 @@ export class ChatBubble {
    */
   async sendPageScroll(percentage: number) {
     return this.whenConnected<{}>(
-      () => this.visitors?.sendPageScroll(percentage) || Promise.reject()
+      () => this.visitors?.sendPageScroll(percentage) || Promise.reject(),
     )
   }
 
@@ -340,7 +340,7 @@ export class ChatBubble {
    */
   registerPushToken(type: PushService, data: any) {
     return this.whenConnected<API.OkResponse>(() =>
-      this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data)
+      this.restClient.pushSubscribe(this.config.botId, this.userToken!, type, data),
     )
   }
 
@@ -391,14 +391,14 @@ export class ChatBubble {
     if (this.userToken) {
       return callback()
     } else {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         this.postConnect.push(async () => resolve(await callback()))
       })
     }
   }
 
   private async connectSocket(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.socket.onOpen(resolve)
       this.socket.connect()
     })
@@ -411,7 +411,7 @@ export function buildSocket(config: Config): Socket {
   const opts = {
     params: { frontend: config.frontend || 'web_widget' },
     heartbeatIntervalMs: 5000,
-    reconnectAfterMs
+    reconnectAfterMs,
   }
 
   const socket = new Socket(`ws${config.secure ? 's' : ''}://${config.hostname}/socket`, opts)
@@ -421,7 +421,7 @@ export function buildSocket(config: Config): Socket {
     sock._connectionEstablishedOnce = true
   })
 
-  socket.onError((reason, transport, establishedConnections) => {
+  socket.onError((_reason, transport, establishedConnections) => {
     sock.channels.forEach((ch: any) => {
       const params = ch.params()
       ch.params = () => ({ ...params, reconnect: true })

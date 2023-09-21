@@ -39,7 +39,7 @@ export namespace Conversations {
       return {
         userId: response.user_id,
         userToken: response.delegate_token,
-        userInfo: response.user
+        userInfo: response.user,
       }
     }
 
@@ -58,7 +58,7 @@ export namespace Conversations {
 
     async closeConversation(g: string) {
       return promisify<void>(() => this.channel.push('close_conversation', { g })).then(() =>
-        this.syncPresence()
+        this.syncPresence(),
       )
     }
 
@@ -70,23 +70,23 @@ export namespace Conversations {
 
     private syncPresence = async () => {
       const { conversations } = await promisify<API.ConversationsListResponse>(() =>
-        this.channel.push('list_conversations', {})
+        this.channel.push('list_conversations', {}),
       )
 
       const badgeCount = conversations.reduce(
         (count, conversation) => conversation.unread_message_count + count,
-        0
+        0,
       )
 
       const badgeConversation = conversations.reduce(
         (g, conv) => g || (conv.unread_message_count > 0 ? conv.g : null),
-        null as null | string
+        null as null | string,
       )
 
       const payload = {
         conversations,
         badgeConversation,
-        badgeCount
+        badgeCount,
       }
 
       this.onConversationsUpdate.dispatch(payload)
@@ -97,7 +97,7 @@ export namespace Conversations {
       const event: Event = {
         name,
         sender,
-        payload: JSON.parse(json)
+        payload: JSON.parse(json),
       }
       this.onEvent.dispatch(event)
     }

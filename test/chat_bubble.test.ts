@@ -17,9 +17,9 @@ Object.assign(expect).extend({
     const pass = !!(received instanceof Error && received.message.match(match))
     return {
       pass,
-      message: () => `expected an Error with message ${match}, got: ${received}`
+      message: () => `expected an Error with message ${match}, got: ${received}`,
     }
-  }
+  },
 })
 
 describe('ChatBubble instantiation', () => {
@@ -28,7 +28,7 @@ describe('ChatBubble instantiation', () => {
       () =>
         new ChatBubble({
           userAgent: '',
-          botId: ''
+          botId: '',
         })
     ).toThrow(/parameter missing/)
 
@@ -36,7 +36,7 @@ describe('ChatBubble instantiation', () => {
       () =>
         new ChatBubble({
           userAgent: USER_AGENT,
-          botId: ''
+          botId: '',
         })
     ).toThrow(/parameter missing/)
   })
@@ -45,7 +45,7 @@ describe('ChatBubble instantiation', () => {
     expect(
       new ChatBubble({
         userAgent: USER_AGENT,
-        botId: 'fdsf809ds8f09dsf'
+        botId: 'fdsf809ds8f09dsf',
       })
     ).toBeInstanceOf(ChatBubble)
   })
@@ -53,7 +53,7 @@ describe('ChatBubble instantiation', () => {
   it('sets default hostname', () => {
     const bubble = new ChatBubble({
       userAgent: USER_AGENT,
-      botId: 'fdsf809ds8f09dsf'
+      botId: 'fdsf809ds8f09dsf',
     })
 
     expect(bubble.getConfig().hostname).toBe('bsqd.me')
@@ -63,7 +63,7 @@ describe('ChatBubble instantiation', () => {
 export const VALID_JOIN_PARAMS: Config = {
   botId: 'e222b5b3-9d36-4de6-bfc8-ebb93292521d',
   userAgent: USER_AGENT + ' (Android 6.0)',
-  hostname: 'staging.bsqd.me'
+  hostname: 'staging.bsqd.me',
 }
 
 /*
@@ -166,7 +166,7 @@ describe('ChatBubble user info', () => {
     const result = await bubble.putUserInfo({
       first_name: 'SDK test user',
       last_name: 'Lastname',
-      foo: 'bar'
+      foo: 'bar',
     })
 
     expect(result.first_name).toEqual('SDK test user')
@@ -217,7 +217,7 @@ describe('ChatBubble page views', () => {
 
     const a = bubble
       .sendPageView('https://example.com', 'My first page')
-      .then(result => expect(result).toEqual({}))
+      .then((result) => expect(result).toEqual({}))
 
     // errors before connect are ignored
     bubble.sendPageView('xxbla', 'invalid page')
@@ -234,8 +234,8 @@ describe('ChatBubble badge count', () => {
 
     await bubble.connect()
 
-    return new Promise(resolve => {
-      bubble.onConversationsUpdate.subscribe(info => {
+    return new Promise<void>((resolve) => {
+      bubble.onConversationsUpdate.subscribe((info) => {
         expect(typeof info.badgeCount).toBe('number')
         expect(info.badgeCount).toEqual(0)
         expect(info.badgeConversation).toEqual(null)

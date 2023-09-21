@@ -158,7 +158,7 @@ export enum PushService {
   WEB_PUSH = 'web-push',
   FIREBASE = 'firebase',
   PUSHWOOSH = 'pushwoosh',
-  EXPO = 'expo'
+  EXPO = 'expo',
 }
 
 // Botsquad websocket / REST API responses
@@ -331,7 +331,7 @@ export namespace API {
   export enum NudgeResponse {
     SHOW = 'show',
     ENGAGE = 'engage',
-    DISCARD = 'discard'
+    DISCARD = 'discard',
   }
 
   export interface PushRegisterRequest {

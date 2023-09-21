@@ -25,7 +25,7 @@ export namespace REST {
         'POST',
         botId,
         'leave-message',
-        request
+        request,
       )
     }
 
@@ -33,13 +33,13 @@ export namespace REST {
       const request = {
         type,
         data,
-        delegate_token: userToken
+        delegate_token: userToken,
       }
       return this.request<API.PushRegisterRequest, API.OkResponse>(
         'POST',
         botId,
         'push_subscribe',
-        request
+        request,
       )
     }
 
@@ -49,7 +49,7 @@ export namespace REST {
       method: 'GET' | 'POST',
       botId: string,
       path?: string,
-      request?: RQ
+      request?: RQ,
     ) {
       const body = request ? JSON.stringify(request) : undefined
       const endpoint = this.endpointUrl(botId, path)
