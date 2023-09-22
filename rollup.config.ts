@@ -5,6 +5,7 @@ import camelCase from 'lodash.camelcase'
 import typescript from '@rollup/plugin-typescript'
 import json from '@rollup/plugin-json'
 import replace from '@rollup/plugin-replace'
+import terser from '@rollup/plugin-terser'
 
 import pkg from './package.json'
 
@@ -45,5 +46,7 @@ export default {
 
     // Resolve source maps to the original source
     sourceMaps(),
+
+    terser(),
   ],
 }
