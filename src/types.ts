@@ -195,7 +195,9 @@ export namespace API {
       imageUrl?: string
       chat?: 'always' | 'operator' | 'off'
       whatsappNumber?: string
+      whatsappNumberDisplay?: string
       phoneNumber?: string
+      phoneNumberDisplay?: string
       contactForm?: boolean
     }
   }
