@@ -191,6 +191,7 @@ export namespace API {
     }
     widget: {
       mainColor?: string
+      position?: 'bottom_right' | 'bottom_left' | 'top_right' | 'top_left'
       iconUrl?: string
       imageUrl?: string
       chat?: 'always' | 'operator' | 'off'
