@@ -199,7 +199,7 @@ export namespace API {
       whatsappNumberDisplay?: string
       phoneNumber?: string
       phoneNumberDisplay?: string
-      contactForm?: boolean
+      contactForm?: boolean | 'chat'
     }
   }
 
@@ -353,5 +353,10 @@ export namespace API {
     phone?: string
     email: string
     message: string
+  }
+
+  export interface LeaveMessageResponse {
+    result: 'OK'
+    g: string
   }
 }

@@ -21,7 +21,7 @@ export namespace REST {
     }
 
     public async leaveMessage(botId: string, request: API.LeaveMessageRequest) {
-      return this.request<API.LeaveMessageRequest, API.OkResponse>(
+      return this.request<API.LeaveMessageRequest, API.LeaveMessageResponse>(
         'POST',
         botId,
         'leave-message',
