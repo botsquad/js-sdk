@@ -195,6 +195,7 @@ export namespace API {
       iconUrl?: string
       imageUrl?: string
       chat?: 'always' | 'operator' | 'off'
+      hideOperators?: boolean
       whatsappNumber?: string
       whatsappNumberDisplay?: string
       phoneNumber?: string
