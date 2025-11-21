@@ -161,6 +161,8 @@ export enum PushService {
   EXPO = 'expo',
 }
 
+import { Expr } from './nudge_evaluator'
+
 // Botsquad websocket / REST API responses
 export namespace API {
   export type ChatInputPart = 'text' | 'location' | 'image' | 'file' | 'audio'
@@ -302,9 +304,21 @@ export namespace API {
     status: 'online' | 'away' | 'offline' | 'bot'
   }
 
+  export type OfficeHours = [string, string] | [null, null]
+
   export interface VisitorsJoinResponse {
     visitor_id: string
     user_id: string
+    nudges: { id: string, expr: Expr }[],
+    context: {
+      ab: number,
+      office_hours: OfficeHours[]
+      visitor: {
+        inserted_at: string
+        timezone: string | null
+        locale: string | null
+      },
+    }
   }
 
   export interface VisitorsJoinParams {
