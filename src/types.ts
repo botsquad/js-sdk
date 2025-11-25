@@ -173,8 +173,6 @@ export namespace API {
 
   export interface BotResponseWidget {
     // from frontend
-    visitors: boolean
-    visitors_sdk_only: boolean
     domains: string[]
 
     // from yaml
