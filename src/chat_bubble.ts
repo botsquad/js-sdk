@@ -171,21 +171,22 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-    // join visitors channel for nudges.
-    this.visitors = new V.Manager(
-      this.socket,
-      this.config,
-      joinResponse,
-      this.onNudgeDispatcher,
-      this.onEventDispatcher,
-    )
+    // join visitors channel when we have nudges
+    if (bot.has_nudges) {
+      this.visitors = new V.Manager(
+        this.socket,
+        this.config,
+        joinResponse,
+        this.onNudgeDispatcher,
+        this.onEventDispatcher,
+      )
 
-    try {
-      await this.visitors.join()
-    } catch (e) {
-      this.visitors = null
+      try {
+        await this.visitors.join()
+      } catch (e) {
+        this.visitors = null
+      }
     }
-
     // send any pending request
     try {
       await Promise.all(this.postConnect.map((callback) => callback()))

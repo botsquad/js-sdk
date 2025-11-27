@@ -261,6 +261,7 @@ export namespace API {
     locale: string
     extra_locales: string[]
     ui_labels: any
+    has_nudges: boolean
     pwa?: BotResponsePWA
     widget?: BotResponseWidget
   }
@@ -307,15 +308,15 @@ export namespace API {
   export interface VisitorsJoinResponse {
     visitor_id: string
     user_id: string
-    nudges: { id: string, expr: Expr }[],
+    nudges: { id: string; expr: Expr }[]
     context: {
-      ab: number,
+      ab: number
       office_hours: OfficeHours[]
       visitor: {
         inserted_at: string
         timezone: string | null
         locale: string | null
-      },
+      }
     }
   }
 
