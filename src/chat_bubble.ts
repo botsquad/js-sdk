@@ -171,21 +171,19 @@ export class ChatBubble {
     this.userToken = userToken
     this.userInfo = userInfo
 
-    if (bot.widget?.visitors || bot.widget?.visitors_sdk_only) {
-      // join visitors channel, for live presence and tracking page views
-      this.visitors = new V.Manager(
-        this.socket,
-        this.config,
-        joinResponse,
-        this.onNudgeDispatcher,
-        this.onEventDispatcher,
-      )
+    // join visitors channel for nudges.
+    this.visitors = new V.Manager(
+      this.socket,
+      this.config,
+      joinResponse,
+      this.onNudgeDispatcher,
+      this.onEventDispatcher,
+    )
 
-      try {
-        await this.visitors.join()
-      } catch (e) {
-        this.visitors = null
-      }
+    try {
+      await this.visitors.join()
+    } catch (e) {
+      this.visitors = null
     }
 
     // send any pending request

@@ -2,6 +2,7 @@ import { Socket, Channel } from 'phoenix'
 import { SimpleEventDispatcher } from 'ste-simple-events'
 import { Config, Nudge, Event, ExtendedNudgeResponse, API } from './types'
 import { promisify } from './channel'
+import { NudgeEvaluator } from './nudge_evaluator'
 
 export namespace Visitors {
   type OnNudge = SimpleEventDispatcher<Nudge>
@@ -11,6 +12,7 @@ export namespace Visitors {
     private channel: Channel
     public onNudge: OnNudge
     public onEvent: OnEvent
+    private nudgeEvaluator: NudgeEvaluator | null = null
 
     constructor(
       socket: Socket,
@@ -25,12 +27,23 @@ export namespace Visitors {
         `visitor:${config.botId}`,
         this.joinParams(config, conversationInfo),
       )
-      this.channel.on('nudge', this.onReceiveNudge)
+      this.channel.onClose(() => {
+        if (this.nudgeEvaluator) {
+          this.nudgeEvaluator.stop()
+        }
+      })
       this.channel.on('event', this.onReceiveEvent)
     }
 
     async join(): Promise<API.VisitorsJoinResponse> {
-      return this.joinChannel()
+      return this.joinChannel().then(response => {
+        const { nudges, context } = response
+        if (nudges && context) {
+          this.nudgeEvaluator = new NudgeEvaluator(this.channel, this.onReceiveNudge, nudges, context)
+          this.nudgeEvaluator.start()
+        }
+        return response
+      })
     }
 
     async sendPageView(url: string, title: string) {
