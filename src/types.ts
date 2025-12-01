@@ -201,6 +201,7 @@ export namespace API {
       phoneNumber?: string
       phoneNumberDisplay?: string
       contactForm?: boolean | 'chat'
+      skipHome?: boolean
     }
   }
 
