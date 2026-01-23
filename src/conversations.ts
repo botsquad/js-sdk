@@ -48,11 +48,11 @@ export namespace Conversations {
     }
 
     getOnConversationsUpdate() {
-      setImmediate(() => {
+      setTimeout(() => {
         if (this.lastConversationsPayload) {
           this.onConversationsUpdate.dispatch(this.lastConversationsPayload)
         }
-      })
+      }, 0)
       return this.onConversationsUpdate.asEvent()
     }
 
