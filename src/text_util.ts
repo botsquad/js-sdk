@@ -70,7 +70,7 @@ export function processText(value: string, opts?: ProcessTextOpts): HtmlObject {
       const rendered = codeRenderer.call(renderer as any, text, language, escaped)
 
       if (currentRenderOpts.copyButtonContent) {
-        return `<div class="copy"><button class="copy-button">${currentRenderOpts.copyButtonContent}</button>${rendered}</div>`
+        return `<div class="bsqd-copy"><button class="bsqd-copy-button">${currentRenderOpts.copyButtonContent}</button>${rendered}</div>`
       } else {
         return rendered
       }
