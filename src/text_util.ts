@@ -34,7 +34,17 @@ export function processTemplate(template: Template, parameters: Record<string, s
   return isInnerHtml ? { __html: str } : str
 }
 
-export function processText(value: string): HtmlObject {
+export interface ProcessTextOpts {
+  copyButtonContent?: string
+}
+
+// Backwards compat defaults.
+const DEFAULT_RENDER_OPTS: ProcessTextOpts = { copyButtonContent: undefined }
+let currentRenderOpts: ProcessTextOpts = { ...DEFAULT_RENDER_OPTS }
+
+export function processText(value: string, opts?: ProcessTextOpts): HtmlObject {
+  currentRenderOpts = Object.assign({ ...DEFAULT_RENDER_OPTS }, opts || {})
+
   if (!markdownOpts) {
     const renderer = new marked.Renderer()
     const linkRenderer = renderer.link
@@ -53,6 +63,19 @@ export function processText(value: string): HtmlObject {
       }
       return html.replace(/^<a /, '<a target="_blank" rel="nofollow" ')
     }
+
+    const codeRenderer = renderer.code
+
+    renderer.code = (text: string, language: string, escaped: boolean) => {
+      const rendered = codeRenderer.call(renderer as any, text, language, escaped)
+
+      if (currentRenderOpts.copyButtonContent) {
+        return `<div class="copy"><button class="copy-button">${currentRenderOpts.copyButtonContent}</button>${rendered}</div>`
+      } else {
+        return rendered
+      }
+    }
+
     markdownOpts = { renderer, breaks: true, gfm: true }
   }
   return {
