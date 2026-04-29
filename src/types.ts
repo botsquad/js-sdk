@@ -192,6 +192,7 @@ export namespace API {
     widget: {
       mainColor?: string
       position?: 'bottom_right' | 'bottom_left' | 'top_right' | 'top_left'
+      initialSize?: null | 'normal' | 'large'
       iconUrl?: string
       imageUrl?: string
       chat?: 'always' | 'operator' | 'off'
