@@ -310,7 +310,7 @@ export namespace API {
   export interface VisitorsJoinResponse {
     visitor_id: string
     user_id: string
-    nudges: { id: string; expr: Expr }[]
+    nudges: { id: string; expr: Expr; nudge?: VisitorsNudge }[]
     context: {
       ab: number
       office_hours: OfficeHours[]

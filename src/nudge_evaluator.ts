@@ -10,6 +10,8 @@ interface ChannelLike {
 
 type ErrorTracker = { [key: string]: number }
 
+const TRIGGERED_NUDGES_STORAGE_KEY = 'dialox.triggeredNudges'
+
 export class NudgeEvaluator {
   private context: Context
   private interval: NodeJS.Timeout | null = null
@@ -29,6 +31,8 @@ export class NudgeEvaluator {
   ) {
     this.context = new Context(context)
     this.onStop = onStop
+    this.triggeredNudges = readTriggeredNudges()
+    this.queuedForRemoval = this.triggeredNudges
   }
 
   running() {
@@ -67,7 +71,7 @@ export class NudgeEvaluator {
       return
     }
 
-    for (const { id, expr } of this.nudges) {
+    for (const { id, expr, nudge } of this.nudges) {
       const result = nudgeEval(this.context, expr)
 
       if (result instanceof Error) {
@@ -86,23 +90,41 @@ export class NudgeEvaluator {
         continue
       }
 
-      if (result) {
-        promisify<API.VisitorsNudge | null>(() => this.channel.push('trigger-nudge', { id }))
-          .then(response => {
-            if (response) {
-              this.onNudge(response)
-            }
-            this.queuedForRemoval.add(id)
-            this.triggeredNudges.add(id)
-          })
-          .catch((reason) => {
-            console.error(reason)
-            this.queuedForRemoval.add(id)
-            this.erroredNudges.add(id)
-          })
+      if (result && nudge) {
+        this.queuedForRemoval.add(id)
+
+        try {
+          this.onNudge(nudge)
+          this.triggeredNudges.add(id)
+          this.syncTriggeredNudges()
+        } catch (err) {
+          this.erroredNudges.add(id)
+        }
       }
     }
+  }
 
+  syncTriggeredNudges() {
+    try {
+      if (typeof localStorage === 'undefined') return
+      const items = Array.from(this.triggeredNudges.values())
+      localStorage.setItem(TRIGGERED_NUDGES_STORAGE_KEY, JSON.stringify(items))
+    } catch {
+      // localStorage may be unavailable
+    }
+  }
+}
+
+function readTriggeredNudges(): Set<string> {
+  try {
+    if (typeof localStorage === 'undefined') return new Set()
+    const raw = localStorage.getItem(TRIGGERED_NUDGES_STORAGE_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed.filter((id): id is string => typeof id === 'string'))
+  } catch {
+    return new Set()
   }
 }
 
