@@ -18,22 +18,22 @@ const DEFAULT_BACKEND_CONTEXT = {
     [null, null],
   ] as API.OfficeHours[],
   visitor: {
-    inserted_at: new Date(new Date().getTime() - (1000 * 60 * 60 * 5)).toISOString(),
+    inserted_at: new Date(new Date().getTime() - 1000 * 60 * 60 * 5).toISOString(),
     timezone: 'Europe/Amsterdam',
-    locale: 'en'
-  }
+    locale: 'en',
+  },
 }
 
 const context = new Context(DEFAULT_BACKEND_CONTEXT)
 
-describe('nudgeEval', function() {
-  it('scalars as boolean', function() {
+describe('nudgeEval', function () {
+  it('scalars as boolean', function () {
     assert.isTrue(nudgeEval(context, true))
     assert.isFalse(nudgeEval(context, false))
     assert.isFalse(nudgeEval(context, null))
   })
 
-  it('operators', function() {
+  it('operators', function () {
     assert.isTrue(nudgeEval(context, ['!', false]))
     assert.isFalse(nudgeEval(context, ['!', true]))
 
@@ -74,13 +74,13 @@ describe('nudgeEval', function() {
     assert.isFalse(nudgeEval(context, ['or', false, false]))
   })
 
-  it('executes var', function() {
+  it('executes var', function () {
     assert.isTrue(nudgeEval(context, ['var', ['visitor', 'returning']]))
     assert.isTrue(nudgeEval(context, ['==', ['var', ['visitor', 'returning']], true]))
-    assert.isTrue(nudgeEval(context, ['==', ['var', ['visitor', 'timezone']], "Europe/Amsterdam"]))
+    assert.isTrue(nudgeEval(context, ['==', ['var', ['visitor', 'timezone']], 'Europe/Amsterdam']))
   })
 
-  it('time_on_page', function() {
+  it('time_on_page', function () {
     // Pretend we opened the page 10 seconds ago.
     const tenSecondsAgo = new Date(new Date().getTime() - 10000)
     const pastContext = new Context(DEFAULT_BACKEND_CONTEXT, tenSecondsAgo)
@@ -89,7 +89,7 @@ describe('nudgeEval', function() {
     assert.isFalse(nudgeEval(context, ['>', ['var', ['time_on_page']], 6]))
   })
 
-  it('evaluates page vars', function() {
+  it('evaluates page vars', function () {
     assert.isTrue(nudgeEval(context, ['==', ['var', ['page', 'path']], '/']))
     assert.isTrue(nudgeEval(context, ['==', ['var', ['page', 'params', 'utm']], null]))
 
@@ -99,7 +99,7 @@ describe('nudgeEval', function() {
     assert.isTrue(nudgeEval(newContext, ['==', ['var', ['page', 'params', 'utm']], 'google']))
   })
 
-  it('within_office_hours', function() {
+  it('within_office_hours', function () {
     const officeHours = [
       ['00:00', '23:59'],
       ['00:00', '23:59'],
@@ -116,7 +116,7 @@ describe('nudgeEval', function() {
     assert.isTrue(nudgeEval(context, ['var', ['within_office_hours']]))
   })
 
-  it('ab', function() {
+  it('ab', function () {
     assert.equal(context.ab, 40)
     assert.isTrue(nudgeEval(context, ['>', ['var', ['ab']], 30]))
     assert.isFalse(nudgeEval(context, ['>', ['var', ['ab']], 60]))
@@ -174,7 +174,7 @@ class MockPush<T> {
 
 class MockChannel {
   constructor(
-    private onPush: (event: string, payload: any, push: MockPush<any>) => any = () => {}
+    private onPush: (event: string, payload: any, push: MockPush<any>) => any = () => {},
   ) {}
 
   push<T>(event: string, payload: any): MockPush<T> {
@@ -189,6 +189,10 @@ const alwaysTimeoutChannel = new MockChannel((_event, _payload, push) => {
 })
 
 describe('NudgeEvaluator', function () {
+  beforeEach(function () {
+    localStorage.clear()
+  })
+
   it('does nothing when there are no nudges', function () {
     const e = new NudgeEvaluator(alwaysTimeoutChannel, () => {}, [], DEFAULT_BACKEND_CONTEXT)
     assert.isFalse(e.running())
@@ -196,22 +200,61 @@ describe('NudgeEvaluator', function () {
     assert.isFalse(e.running())
   })
 
+  it('persists triggered nudges to localStorage and restores them', function () {
+    const nudge = {
+      id: 'instant-nudge',
+      expr: true as any,
+      nudge: { id: 'instant-nudge', title: 'Title', json: '{}' },
+    }
+
+    const first = new NudgeEvaluator(
+      alwaysTimeoutChannel,
+      () => {},
+      [nudge],
+      DEFAULT_BACKEND_CONTEXT,
+    )
+    first.start()
+    first.stop()
+
+    assert.isTrue(first.triggeredNudges.has('instant-nudge'))
+    assert.deepEqual(JSON.parse(localStorage.getItem('dialox.triggeredNudges')!), ['instant-nudge'])
+
+    let onNudgeCalled = false
+    const second = new NudgeEvaluator(
+      alwaysTimeoutChannel,
+      () => {
+        onNudgeCalled = true
+      },
+      [nudge],
+      DEFAULT_BACKEND_CONTEXT,
+    )
+
+    assert.isTrue(second.triggeredNudges.has('instant-nudge'))
+    second.start()
+    second.stop()
+    assert.isFalse(onNudgeCalled, 'already-triggered nudges should not fire again')
+  })
+
   it('evaluates nudges', function () {
     return new Promise<void>((resolve, reject) => {
       const timerNudge = {
         id: 'timer-nudge',
         expr: ['>', ['var', ['time_on_page']], 0.1] as any,
+        nudge: { id: 'timer-nudge', title: 'Title', json: '{}' },
       }
 
       const instantNudge = {
         id: 'instant-nudge',
-        expr: true
+        expr: true as any,
+        nudge: { id: 'instant-nudge', title: 'Title', json: '{}' },
       }
 
-      const channel = new MockChannel((event, payload, push: MockPush<API.VisitorsNudge | null>) => {
-        assert.equal(event, 'trigger-nudge')
-        push.ok({ id: payload.id, title: 'Title', json: '{}' })
-      })
+      const channel = new MockChannel(
+        (event, payload, push: MockPush<API.VisitorsNudge | null>) => {
+          assert.equal(event, 'trigger-nudge')
+          push.ok({ id: payload.id, title: 'Title', json: '{}' })
+        },
+      )
 
       let evaluator: NudgeEvaluator
 
@@ -236,32 +279,7 @@ describe('NudgeEvaluator', function () {
     })
   })
 
-  it('discards nudges that returned an error from the server', async function() {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
-
-    const evaluator = await new Promise<NudgeEvaluator>((resolve, reject) => {
-      const channel = new MockChannel((_event, _payload, push) => {
-        push.err('nudge not found')
-      })
-
-      const onNudge = () => {
-        assert.fail('onNudge should not have been called')
-        reject()
-      }
-
-      const nudge = { id: 'example', expr: true }
-
-      const evaluator = new NudgeEvaluator(channel, onNudge, [nudge], DEFAULT_BACKEND_CONTEXT, () => {
-        resolve(evaluator)
-      })
-      evaluator.setIntervalSpeed(50)
-      evaluator.start()
-    })
-
-    assert.isTrue(evaluator.erroredNudges.has('example'))
-  })
-
-  it('removes a nudge if it fails many times', async function() {
+  it('removes a nudge if it fails many times', async function () {
     jest.spyOn(console, 'error').mockImplementation(() => {})
 
     const evaluator = await new Promise<NudgeEvaluator>((resolve, reject) => {
@@ -272,9 +290,15 @@ describe('NudgeEvaluator', function () {
       const onNudge = () => reject()
       const nudge = { id: 'example', expr: ['not an operator', true, true] as any }
 
-      const evaluator = new NudgeEvaluator(channel, onNudge, [nudge], DEFAULT_BACKEND_CONTEXT, () => {
-        resolve(evaluator)
-      })
+      const evaluator = new NudgeEvaluator(
+        channel,
+        onNudge,
+        [nudge],
+        DEFAULT_BACKEND_CONTEXT,
+        () => {
+          resolve(evaluator)
+        },
+      )
       evaluator.setIntervalSpeed(20)
       evaluator.start()
     })
