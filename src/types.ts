@@ -310,7 +310,7 @@ export namespace API {
   export interface VisitorsJoinResponse {
     visitor_id: string
     user_id: string
-    nudges: { id: string; expr: Expr; nudge?: VisitorsNudge }[]
+    nudges: { id: string; expr: Expr; nudge?: InlineNudge }[]
     context: {
       ab: number
       office_hours: OfficeHours[]
@@ -333,6 +333,14 @@ export namespace API {
   export interface PageView {
     url: string
     title: string
+  }
+
+  /** The nudge definition as sent inline in the visitor channel join response */
+  export interface InlineNudge {
+    id: string
+    title: string
+    expr?: string
+    contents: Record<string, any>
   }
 
   export interface VisitorsNudge {

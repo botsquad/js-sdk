@@ -63,6 +63,9 @@ export namespace Visitors {
       action: API.NudgeResponse,
       response?: ExtendedNudgeResponse,
     ): Promise<void> {
+      if (action === API.NudgeResponse.ENGAGE || action === API.NudgeResponse.DISCARD) {
+        this.nudgeEvaluator?.markHandled(nudge.id)
+      }
       const payload = { action, nudge_id: nudge.id, ...response }
       return promisify<void>(() => this.channel.push('nudge_response', payload))
     }
@@ -89,11 +92,11 @@ export namespace Visitors {
       return promisify<API.VisitorsJoinResponse>(() => this.channel.join())
     }
 
-    private onReceiveNudge = ({ id, title, json }: API.VisitorsNudge) => {
+    private onReceiveNudge = ({ id, title, contents }: API.InlineNudge) => {
       const nudge: Nudge = {
         id,
         title,
-        ...JSON.parse(json),
+        ...(contents as Omit<Nudge, 'id' | 'title'>),
       }
       this.onNudge.dispatch(nudge)
     }

@@ -200,24 +200,47 @@ describe('NudgeEvaluator', function () {
     assert.isFalse(e.running())
   })
 
-  it('persists triggered nudges to localStorage and restores them', function () {
+  it('does not persist nudges that were only triggered', function () {
     const nudge = {
       id: 'instant-nudge',
       expr: true as any,
-      nudge: { id: 'instant-nudge', title: 'Title', json: '{}' },
+      nudge: { id: 'instant-nudge', title: 'Title', contents: { message: 'Hi' } },
     }
 
-    const first = new NudgeEvaluator(
-      alwaysTimeoutChannel,
-      () => {},
-      [nudge],
-      DEFAULT_BACKEND_CONTEXT,
-    )
+    const first = new NudgeEvaluator(alwaysTimeoutChannel, () => {}, [nudge], DEFAULT_BACKEND_CONTEXT)
     first.start()
     first.stop()
 
     assert.isTrue(first.triggeredNudges.has('instant-nudge'))
-    assert.deepEqual(JSON.parse(localStorage.getItem('dialox.triggeredNudges')!), ['instant-nudge'])
+    assert.isNull(localStorage.getItem('dialox.handledNudges'))
+
+    let onNudgeCalled = false
+    const second = new NudgeEvaluator(
+      alwaysTimeoutChannel,
+      () => {
+        onNudgeCalled = true
+      },
+      [nudge],
+      DEFAULT_BACKEND_CONTEXT,
+    )
+    second.start()
+    second.stop()
+    assert.isTrue(onNudgeCalled, 'unhandled nudges should fire again on a new page load')
+  })
+
+  it('persists handled nudges to localStorage and restores them', function () {
+    const nudge = {
+      id: 'instant-nudge',
+      expr: true as any,
+      nudge: { id: 'instant-nudge', title: 'Title', contents: { message: 'Hi' } },
+    }
+
+    const first = new NudgeEvaluator(alwaysTimeoutChannel, () => {}, [nudge], DEFAULT_BACKEND_CONTEXT)
+    first.start()
+    first.stop()
+    first.markHandled('instant-nudge')
+
+    assert.deepEqual(JSON.parse(localStorage.getItem('dialox.handledNudges')!), ['instant-nudge'])
 
     let onNudgeCalled = false
     const second = new NudgeEvaluator(
@@ -229,10 +252,11 @@ describe('NudgeEvaluator', function () {
       DEFAULT_BACKEND_CONTEXT,
     )
 
+    assert.isTrue(second.handledNudges.has('instant-nudge'))
     assert.isTrue(second.triggeredNudges.has('instant-nudge'))
     second.start()
     second.stop()
-    assert.isFalse(onNudgeCalled, 'already-triggered nudges should not fire again')
+    assert.isFalse(onNudgeCalled, 'handled nudges should not fire again')
   })
 
   it('evaluates nudges', function () {
@@ -240,13 +264,13 @@ describe('NudgeEvaluator', function () {
       const timerNudge = {
         id: 'timer-nudge',
         expr: ['>', ['var', ['time_on_page']], 0.1] as any,
-        nudge: { id: 'timer-nudge', title: 'Title', json: '{}' },
+        nudge: { id: 'timer-nudge', title: 'Title', contents: { message: 'Hi' } },
       }
 
       const instantNudge = {
         id: 'instant-nudge',
         expr: true as any,
-        nudge: { id: 'instant-nudge', title: 'Title', json: '{}' },
+        nudge: { id: 'instant-nudge', title: 'Title', contents: { message: 'Hi' } },
       }
 
       const channel = new MockChannel(
@@ -258,7 +282,7 @@ describe('NudgeEvaluator', function () {
 
       let evaluator: NudgeEvaluator
 
-      const onNudge = (nudge: API.VisitorsNudge) => {
+      const onNudge = (nudge: API.InlineNudge) => {
         assert.equal(nudge.title, 'Title')
 
         if (nudge.id === 'timer-nudge') {
