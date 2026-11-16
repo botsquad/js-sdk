@@ -10,12 +10,17 @@ interface ChannelLike {
 
 type ErrorTracker = { [key: string]: number }
 
-const TRIGGERED_NUDGES_STORAGE_KEY = 'dialox.triggeredNudges'
+// Only nudges the visitor engaged with or discarded are persisted here; nudges that merely
+// triggered are tracked in memory and may trigger again on a later page load.
+const HANDLED_NUDGES_STORAGE_KEY = 'dialox.handledNudges'
 
 export class NudgeEvaluator {
   private context: Context
   private interval: NodeJS.Timeout | null = null
+  /** Nudges triggered during this page load, plus the persisted handled nudges */
   public triggeredNudges = new Set<string>()
+  /** Nudges the visitor engaged with or discarded; persisted to localStorage */
+  public handledNudges = new Set<string>()
   public erroredNudges = new Set<string>()
   public errors: ErrorTracker = {}
   private queuedForRemoval = new Set<string>()
@@ -24,15 +29,16 @@ export class NudgeEvaluator {
 
   constructor(
     private channel: ChannelLike,
-    private onNudge: (nudge: API.VisitorsNudge) => void,
+    private onNudge: (nudge: API.InlineNudge) => void,
     public nudges: API.VisitorsJoinResponse['nudges'],
     context: BackendContext,
     onStop: (() => void) | null = null
   ) {
     this.context = new Context(context)
     this.onStop = onStop
-    this.triggeredNudges = readTriggeredNudges()
-    this.queuedForRemoval = this.triggeredNudges
+    this.handledNudges = readHandledNudges()
+    this.triggeredNudges = new Set(this.handledNudges)
+    this.queuedForRemoval = new Set(this.handledNudges)
   }
 
   running() {
@@ -96,29 +102,40 @@ export class NudgeEvaluator {
         try {
           this.onNudge(nudge)
           this.triggeredNudges.add(id)
-          this.syncTriggeredNudges()
         } catch (err) {
+          console.error(err)
           this.erroredNudges.add(id)
         }
       }
     }
   }
 
-  syncTriggeredNudges() {
+  /**
+   * Mark a nudge as handled (engaged with or discarded) so it is not triggered again on later
+   * page loads.
+   */
+  markHandled(id: string) {
+    this.handledNudges.add(id)
+    this.triggeredNudges.add(id)
+    this.queuedForRemoval.add(id)
+    this.syncHandledNudges()
+  }
+
+  private syncHandledNudges() {
     try {
       if (typeof localStorage === 'undefined') return
-      const items = Array.from(this.triggeredNudges.values())
-      localStorage.setItem(TRIGGERED_NUDGES_STORAGE_KEY, JSON.stringify(items))
+      const items = Array.from(this.handledNudges.values())
+      localStorage.setItem(HANDLED_NUDGES_STORAGE_KEY, JSON.stringify(items))
     } catch {
       // localStorage may be unavailable
     }
   }
 }
 
-function readTriggeredNudges(): Set<string> {
+function readHandledNudges(): Set<string> {
   try {
     if (typeof localStorage === 'undefined') return new Set()
-    const raw = localStorage.getItem(TRIGGERED_NUDGES_STORAGE_KEY)
+    const raw = localStorage.getItem(HANDLED_NUDGES_STORAGE_KEY)
     if (!raw) return new Set()
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return new Set()
